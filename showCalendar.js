@@ -43,6 +43,7 @@ function showCalendar(day, month, year) {
     daysCells.forEach(cell => {
         cell.textContent = ''; // Remove o conteúdo anterior
         cell.style.backgroundColor = ''; // Remove a cor de de fundo anterior
+        cell.style.color = '';  // Remove a cor do texto anterior
         cell.style.border = ''; // Remove qualquer borda anterior
     });
 
@@ -57,6 +58,16 @@ function showCalendar(day, month, year) {
         daysCells[i].textContent = dayCounter;
         daysCells[i].style.backgroundColor = 'var(--days-bg-color)'; // Cor dos dias do mês atual
         
+        const currentDayOfWeek = (i % 7);
+        // Pinta o texto dos dias de domingo com vermelho
+        if (currentDayOfWeek === 0) {
+            daysCells[i].style.color = 'var(--sun-color)';
+        }
+        // Pinta o texto dos dias de sábado com azul
+        else if (currentDayOfWeek === 6) {
+            daysCells[i].style.color = 'var(--sat-color)';
+        }
+
         // Verifica se é o dia atual e adiciona o estilo de borda
         if (dayCounter === day) {
             daysCells[i].style.border = '3px solid #899DD9'; // Borda grossa e azul clara para o dia atual
