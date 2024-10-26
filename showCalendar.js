@@ -15,13 +15,27 @@ function getDaysInMonth(year, month) {
     return new Date(year, month, 0).getDate(); // Retorna o número de dias do mês
 }
 
+
+function getMonthName(month) {
+    const monthNames = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+    ];
+    return monthNames[month - 1];
+}
+
+
 function showCalendar(year, month) {
+    const calendarTitle = document.querySelector('.calendar-title');
     const monthElement = document.querySelector('.month');
     const daysCells = monthElement.querySelectorAll('.days');
 
     const dayOfWeek = getDayOfWeek(year, month); // Dia da semana do primeiro dia do mês
     const daysInMonth = getDaysInMonth(year, month); // Total de dias no mês
     const daysInPreviousMonth = getDaysInMonth(year, month - 1); // Total de dias no mês anterior
+
+    // Atualiza o título do calendário com o mês e o ano
+    calendarTitle.textContent = `${getMonthName(month)} de ${year}`;
 
     let dayCounter = 1;
 
@@ -53,8 +67,10 @@ function showCalendar(year, month) {
     }
 }
 
-// Exemplo de uso
-const year = 2024;
-const month = 10; // Outubro
+
+// Pega o ano e o mês atuais
+const currentDate = new Date();
+const year = currentDate.getFullYear();
+const month = currentDate.getMonth() + 1; // getMonth() retorna o mês de 0 a 11, então adicionamos 1
 
 showCalendar(year, month);
