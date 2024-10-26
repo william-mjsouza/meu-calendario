@@ -1,0 +1,88 @@
+@charset "UTF-8";
+
+:root {
+    /* Variáveis pra palheta de cor escolhida */
+    --calendar-title: #ececec;
+    --days-of-week-color:  #ececec;
+    --sun-color: #cc2929;
+    --sat-color: #214aa3;
+    --days-bg-color: #0D0D0D;
+    --event-day-marker-bg-color1: #F28705;
+    --other-days-bg-color: #424242;
+    --event-add-button-bg-color: #7ABFB3;
+    /* Variáveis pras fontes escolhidas */
+    --calendar-title-font: 'Roboto', sans-serif;
+    --days-font: sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    border: none;
+    box-sizing: border-box;
+    font-weight: normal; /* Remove o negrito padrão do `<th>` */
+}
+
+/* Supondo */
+main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Supondo */
+section.calendar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.month {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+}
+
+.calendar-title {
+    font-family: var(--calendar-title-font);
+    font-size: 1em;
+    color: var(--calendar-title);
+    background-color: #383838;
+    border: 1px solid #5554546c;
+}
+
+.days-of-the-week-columns {
+    display: flex;
+}
+
+.days-of-the-week, .days {
+    flex: 1; /* Divide igualmente as colunas */
+    color: var(--days-of-week-color);
+    border: 1px solid #5554546c; /* Borda para um efeito de matriz */
+}
+
+.days-of-the-week {
+    background-color: var(--other-days-bg-color);
+    font-family: var(--days-font);
+}
+
+.days {
+    background-color: var(--days-bg-color);
+}
+
+tbody {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Garante que o tbody ocupe a altura restante */
+}
+
+.days-line {
+    display: flex;
+    flex: 1; /* Divide igualmente as linhas do calendário */
+}
