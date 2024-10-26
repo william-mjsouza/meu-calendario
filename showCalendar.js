@@ -25,7 +25,7 @@ function getMonthName(month) {
 }
 
 
-function showCalendar(year, month) {
+function showCalendar(day, month, year) {
     const calendarTitle = document.querySelector('.calendar-title');
     const monthElement = document.querySelector('.month');
     const daysCells = monthElement.querySelectorAll('.days');
@@ -41,8 +41,9 @@ function showCalendar(year, month) {
 
     // Limpa as células antes de preencher
     daysCells.forEach(cell => {
-        cell.textContent = ''; // Limpa as células
-        cell.style.backgroundColor = ''; // Remove o estilo anterior
+        cell.textContent = ''; // Remove o conteúdo anterior
+        cell.style.backgroundColor = ''; // Remove a cor de de fundo anterior
+        cell.style.border = ''; // Remove qualquer borda anterior
     });
 
     // Preenche as células com os últimos dias do mês anterior
@@ -55,6 +56,12 @@ function showCalendar(year, month) {
     for (let i = dayOfWeek; i < dayOfWeek + daysInMonth; i++) {
         daysCells[i].textContent = dayCounter;
         daysCells[i].style.backgroundColor = 'var(--days-bg-color)'; // Cor dos dias do mês atual
+        
+        // Verifica se é o dia atual e adiciona o estilo de borda
+        if (dayCounter === day) {
+            daysCells[i].style.border = '3px solid #899DD9'; // Borda grossa e azul clara para o dia atual
+        }
+
         dayCounter++;
     }
 
@@ -68,9 +75,10 @@ function showCalendar(year, month) {
 }
 
 
-// Pega o ano e o mês atuais
+// Pega o ano, mês e dia atuais
 const currentDate = new Date();
 const year = currentDate.getFullYear();
 const month = currentDate.getMonth() + 1; // getMonth() retorna o mês de 0 a 11, então adicionamos 1
+const day = currentDate.getDate();
 
-showCalendar(year, month);
+showCalendar(day, month, year);
