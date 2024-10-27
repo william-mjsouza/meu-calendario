@@ -2,7 +2,7 @@
 
 :root {
     /* Variáveis pra palheta de cor escolhida */
-    --calendar-title: #ececec;
+    --calendar-title-color: #ececec;
     --days-of-week-color:  #ececec;
     --sun-color: rgb(209, 66, 47);
     --sat-color: #057c97;
@@ -35,11 +35,30 @@ main {
 
 /* Supondo */
 section.calendar {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
+}
+
+.calendar-controls {
+    position: absolute;
+    top: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 100%;
+    padding: 5px;
+}
+
+.previous-month, .next-month {
+    color: var(--calendar-title-color);
+    background: none;
+    border: none;
+    font-size: 1em;
+    cursor: pointer;
 }
 
 .month {
@@ -55,7 +74,7 @@ section.calendar {
     border: 1px solid var(--matrix-border-color);
     font-family: var(--calendar-title-font);
     font-size: 1em;
-    color: var(--calendar-title);
+    color: var(--calendar-title-color);
     background-color: #383838;
 }
 

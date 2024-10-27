@@ -1,3 +1,14 @@
+// Pega o ano, mês e dia atuais
+const currentDate = new Date();
+const YEAR = currentDate.getFullYear();
+const MONTH = currentDate.getMonth() + 1; // getMonth() retorna o mês de 0 a 11, então adicionamos 1
+const DAY = currentDate.getDate();
+
+// Captura os botões
+const previousButton = document.querySelector('.previous-month');
+const nextButton = document.querySelector('.next-month');
+
+
 function getDayOfWeek(year, month) {
     // Cria um objeto Date para o primeiro dia do mês
     // Lembre-se que o mês em JavaScript é 0-indexado (0 = janeiro, 1 = fevereiro, ..., 11 = dezembro)
@@ -69,7 +80,7 @@ function showCalendar(day, month, year) {
         }
 
         // Verifica se é o dia atual e adiciona o estilo de borda
-        if (dayCounter === day) {
+        if (dayCounter === day && month === MONTH && year === YEAR) {
             daysCells[i].style.border = '3px solid #899DD9'; // Borda grossa e azul clara para o dia atual
         }
 
@@ -86,10 +97,42 @@ function showCalendar(day, month, year) {
 }
 
 
-// Pega o ano, mês e dia atuais
-const currentDate = new Date();
-const year = currentDate.getFullYear();
-const month = currentDate.getMonth() + 1; // getMonth() retorna o mês de 0 a 11, então adicionamos 1
-const day = currentDate.getDate();
+function main() {
+    // Inicialização das variáveis de controle do mês e ano
+    let newCurrentMonth = MONTH; // Mês atual
+    let newCurrentYear = YEAR; // Ano atual
 
-showCalendar(day, month, year);
+    // Atualiza a exibição do calendário
+    function updateCalendar() {
+        showCalendar(DAY, newCurrentMonth, newCurrentYear); // Atualiza o calendário com os novos valores de mês e ano
+    }
+
+    // Evento de clique para o botão anterior
+    previousButton.addEventListener('click', () => {
+        if (newCurrentMonth === 1) {
+            newCurrentMonth = 12; // Se estiver em janeiro, vai para dezembro
+            newCurrentYear--; // Diminui o ano
+        } else {
+            newCurrentMonth--; // Apenas diminui o mês
+        }
+        updateCalendar(); // Atualiza o calendário
+    });
+
+    // Evento de clique para o botão seguinte
+    nextButton.addEventListener('click', () => {
+        if (newCurrentMonth === 12) {
+            newCurrentMonth = 1; // Se estiver em dezembro, vai para janeiro
+            newCurrentYear++; // Aumenta o ano
+        } else {
+            newCurrentMonth++; // Apenas aumenta o mês
+        }
+        updateCalendar(); // Atualiza o calendário
+    });
+
+    // Inicializa o calendário na primeira chamada com o mês e o ano atuais
+    showCalendar(DAY, MONTH, YEAR);
+}
+
+
+// Chama a função main ao carregar o script
+main();
