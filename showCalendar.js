@@ -47,6 +47,7 @@ function showCalendar(day, month, year) {
 
     // Atualiza o título do calendário com o mês e o ano
     calendarTitle.textContent = `${getMonthName(month)} de ${year}`;
+    calendarTitle.style.position = 'relative';
 
     let dayCounter = 1;
 

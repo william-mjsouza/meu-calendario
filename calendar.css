@@ -35,7 +35,7 @@ main {
 
 /* Supondo */
 section.calendar {
-    position: relative;
+    /*position: relative;*/
     display: flex;
     align-items: center;
     justify-content: center;
@@ -44,13 +44,14 @@ section.calendar {
 }
 
 .calendar-controls {
-    position: absolute;
+    position: absolute; /* Relativo ao .calendar-title */
     top: 0;
     display: flex;
     align-items: center;
     justify-content: space-around;
     width: 100%;
     padding: 5px;
+    z-index: 1;
 }
 
 .previous-month, .next-month {
