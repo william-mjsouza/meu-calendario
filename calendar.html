@@ -9,15 +9,15 @@
 <body>
     <main>
         <section class="calendar">
-            <div class="calendar-controls">
-                <!-- Ícone de seta para esquerda -->
-                <button class="previous-month">&#9664;</button>
-                <!-- Ícone de seta para direita -->
-                <button class="next-month">&#9654;</button>
-            </div>
             <!-- Tabela com os dias do mês -->
             <table class="month">
-                <caption class="calendar-title">? de 20??</caption>
+                <caption class="calendar-header">
+                    <div class="calendar-controls">
+                        <button class="previous-month">&#9664;</button>
+                        <button class="next-month">&#9654;</button>
+                    </div>
+                    <span class="calendar-title">?? de 20??</span>
+                </caption>
                 <thead>
                     <!-- Todas as 7 colunas -->
                     <tr class="days-of-the-week-columns">
@@ -88,8 +88,16 @@
                     </tr>
                 </tbody>
             </table>
+            <!-- Pop-up para criar evento -->
+            <aside class="add-event" aria-labelledby="popup-title" role="dialog" hidden>
+                <span class="event-date">?? de 20??</span>
+                <span class="saved-events">?</span>
+                <button type="submit" class="create-event-button">Criar</button>
+            </aside>
         </section>
     </main>
-    <script src="showCalendar.js"></script>
+    <script type="module" src="newDateFunctions.js"></script>
+    <script type="module" src="showCalendar.js"></script>
+    <script type="module" src="addEvent.js"></script>
 </body>
 </html>

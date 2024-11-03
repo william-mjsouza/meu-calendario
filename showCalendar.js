@@ -1,3 +1,8 @@
+// Importa as novas funções que criei para manipular datas
+import { getDayOfWeek, getDaysInMonth, getMonthName } from './newDateFunctions.js';
+// Importa a função de exibição do pop-up de adicionar evento no calendário
+import { openPopup } from './addEvent.js';
+
 // Pega o ano, mês e dia atuais
 const currentDate = new Date();
 const YEAR = currentDate.getFullYear();
@@ -9,30 +14,94 @@ const previousButton = document.querySelector('.previous-month');
 const nextButton = document.querySelector('.next-month');
 
 
-function getDayOfWeek(year, month) {
-    // Cria um objeto Date para o primeiro dia do mês
-    // Lembre-se que o mês em JavaScript é 0-indexado (0 = janeiro, 1 = fevereiro, ..., 11 = dezembro)
-    const data = new Date(year, month - 1, 1);
+// Função para lidar com o toque em um dia do mês atual (para smartphones e tablets)
+function handleDayTouch(event) {
+    const dayClicked = event.target.textContent;
 
-    // Obtém o dia da semana (0 = domingo, 1 = segunda, ..., 6 = sábado)
-    const dayOfWeek = data.getDay();
+    // Previne o comportamento padrão para evitar que "tap-and-hold" interfira
+    event.preventDefault();
 
-    // Retorna o dia da semana do primeiro dia do determinado mês do derminado ano
-    return dayOfWeek;
+    // Define a cor de fundo ao iniciar o toque
+    event.target.style.backgroundColor = 'var(--days-clicked-bg-color)';
+
+    function handleTouchEnd() {
+        // Volta à cor original
+        event.target.style.backgroundColor = 'var(--days-bg-color)';
+        
+        // Abre o popup com a data
+        openPopup(dayClicked, MONTH, YEAR);
+
+        // Remove os event listeners após o toque
+        removeTouchListeners();
+    }
+
+    function handleTouchCancel() {
+        // Volta à cor original se o toque for cancelado
+        event.target.style.backgroundColor = 'var(--days-bg-color)';
+
+        // Remove os event listeners
+        removeTouchListeners();
+    }
+
+    function handleTouchMove(moveEvent) {
+        const touch = moveEvent.touches[0];
+        const targetRect = event.target.getBoundingClientRect();
+
+        // Verifica se o toque ainda está dentro dos limites do elemento
+        if (
+            touch.clientX < targetRect.left ||
+            touch.clientX > targetRect.right ||
+            touch.clientY < targetRect.top ||
+            touch.clientY > targetRect.bottom
+        ) {
+            handleTouchCancel();
+        }
+    }
+
+    function removeTouchListeners() {
+        event.target.removeEventListener('touchend', handleTouchEnd);
+        event.target.removeEventListener('touchcancel', handleTouchCancel);
+        event.target.removeEventListener('touchmove', handleTouchMove);
+    }
+
+    // Adiciona event listeners para touchend, touchcancel e touchmove
+    event.target.addEventListener('touchend', handleTouchEnd, { passive: true });
+    event.target.addEventListener('touchcancel', handleTouchCancel, { passive: true });
+    event.target.addEventListener('touchmove', handleTouchMove, { passive: true });
 }
 
 
-function getDaysInMonth(year, month) {
-    return new Date(year, month, 0).getDate(); // Retorna o número de dias do mês
-}
+// Função para lidar com o clique em um dia do mês atual (para computadores)
+function handleDayClick(event) {
+    // Se o botão pressionado do mouse não foi o esquerdo
+    if (event.button !== 0) {
+        return; // Não faz nada
+    }
 
+    const dayClicked = event.target.textContent;
+    
+    // Adiciona a cor de fundo ao pressionar o botão do mouse ou dedo
+    event.target.style.backgroundColor = 'var(--days-clicked-bg-color)';
 
-function getMonthName(month) {
-    const monthNames = [
-        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
-    ];
-    return monthNames[month - 1];
+    // Remover a cor de fundo ao soltar o botão do mouse
+    function handleMouseUp() {
+        event.target.style.backgroundColor = 'var(--days-bg-color)'; // Volta à cor original
+        // Chama a função para abrir o pop-up e passa a data
+        openPopup(dayClicked, MONTH, YEAR);
+        // Remove os event listeners após o clique
+        event.target.removeEventListener('mouseup', handleMouseUp);
+        event.target.removeEventListener('mouseleave', handleMouseLeave);
+    }
+
+    // Remove a cor de fundo se o mouse for movido para fora antes de soltar
+    function handleMouseLeave() {
+        event.target.style.backgroundColor = 'var(--days-bg-color)'; // Volta à cor original
+        event.target.removeEventListener('mouseup', handleMouseUp);
+        event.target.removeEventListener('mouseleave', handleMouseLeave);
+    }
+
+    event.target.addEventListener('mouseup', handleMouseUp);
+    event.target.addEventListener('mouseleave', handleMouseLeave);
 }
 
 
@@ -41,22 +110,27 @@ function showCalendar(day, month, year) {
     const monthElement = document.querySelector('.month');
     const daysCells = monthElement.querySelectorAll('.days');
 
-    const dayOfWeek = getDayOfWeek(year, month); // Dia da semana do primeiro dia do mês
+    const dayOfWeek = getDayOfWeek(year, month, 1); // Dia da semana do primeiro dia do mês
     const daysInMonth = getDaysInMonth(year, month); // Total de dias no mês
     const daysInPreviousMonth = getDaysInMonth(year, month - 1); // Total de dias no mês anterior
 
     // Atualiza o título do calendário com o mês e o ano
     calendarTitle.textContent = `${getMonthName(month)} de ${year}`;
-    calendarTitle.style.position = 'relative';
 
     let dayCounter = 1;
 
     // Limpa as células antes de preencher
     daysCells.forEach(cell => {
-        cell.textContent = ''; // Remove o conteúdo anterior
-        cell.style.backgroundColor = ''; // Remove a cor de de fundo anterior
-        cell.style.color = '';  // Remove a cor do texto anterior
-        cell.style.border = ''; // Remove qualquer borda anterior
+        // Remove o conteúdo anterior
+        cell.textContent = '';
+        // Remove os estilos anteriores
+        cell.style.backgroundColor = '';
+        cell.style.color = '';
+        cell.style.border = '';
+        cell.style.boxShadow = '';
+        // Remove os escutadores de eventos antigos
+        cell.removeEventListener('mousedown', handleDayClick);
+        cell.removeEventListener('touchstart', handleDayTouch);
     });
 
     // Preenche as células com os últimos dias do mês anterior
@@ -82,8 +156,13 @@ function showCalendar(day, month, year) {
 
         // Verifica se é o dia atual e adiciona o estilo de borda
         if (dayCounter === day && month === MONTH && year === YEAR) {
-            daysCells[i].style.border = '3px solid #899DD9'; // Borda grossa e azul clara para o dia atual
+            daysCells[i].style.border = '1px solid #899DD9';    // Borda azul clara para o dia atual
+            daysCells[i].style.boxShadow = '0 0 0 2px #899DD9 inset';   // box-shadow interno para criar um efeito de borda ("engrossa" a borda sem afetar o layout)
         }
+
+        // Adiciona um escutador de evento de segurar clique/ toque para os dias do mês atual
+        daysCells[i].addEventListener('mousedown', handleDayClick);    // Mouse segurando
+        daysCells[i].addEventListener('touchstart', handleDayTouch);    // Toque físico segurando (para celulares/ tablets)
 
         dayCounter++;
     }
