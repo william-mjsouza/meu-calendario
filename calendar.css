@@ -7,6 +7,7 @@
     --sun-color: rgb(209, 66, 47);
     --sat-color: #057c97;
     --days-bg-color: #0D0D0D;
+    --days-clicked-bg-color: #4b4a4a; /* Cor de fundo enquanto o dia está sendo clicado */
     --other-days-bg-color: #424242;
     --matrix-border-color: #5554546c;
     --event-day-marker-bg-color1: #F28705;
@@ -34,24 +35,23 @@ main {
 }
 
 /* Supondo */
-section.calendar {
-    /*position: relative;*/
+.calendar {
+    position: relative; /* O pop-up de adicionar evento no calendário é posicionado em relação a ele */
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100%;
     height: 100%;
+    overflow-y: hidden; /* Impede rolagem vertical */
+    overflow-x: hidden; /* Impede rolagem lateral */
 }
 
 .calendar-controls {
-    position: absolute; /* Relativo ao .calendar-title */
-    top: 0;
+    position: absolute; /* Relativo ao .calendar-header */
     display: flex;
     align-items: center;
     justify-content: space-around;
     width: 100%;
-    padding: 5px;
-    z-index: 1;
 }
 
 .previous-month, .next-month {
@@ -70,13 +70,16 @@ section.calendar {
     border-collapse: collapse;
 }
 
-.calendar-title {
+.calendar-header {
+    position: relative;
     padding: 0.7%;
-    border: 1px solid var(--matrix-border-color);
+    background-color: #383838;
+}
+
+.calendar-title {
     font-family: var(--calendar-title-font);
     font-size: 1em;
     color: var(--calendar-title-color);
-    background-color: #383838;
 }
 
 .days-of-the-week-columns {
@@ -95,6 +98,7 @@ section.calendar {
 }
 
 .days {
+    padding: 5px;
     background-color: var(--days-bg-color);
 }
 
@@ -107,4 +111,107 @@ tbody {
 .days-line {
     display: flex;
     flex: 1; /* Divide igualmente as linhas do calendário */
+}
+
+.add-event {
+    position: absolute; /* Posicionado em relação ao .calendar */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+    display: none; /* Começa oculto */
+}
+
+.add-event[hidden] {
+    display: none; /* Permite ocultar usando o atributo hidden */
+}
+
+.overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 5;
+    display: none; /* Começa oculto */
+}
+
+.overlay.active, .add-event.active {
+    display: flex; /* Mostra quando ativo */
+}
+
+.event-date, .saved-events, .create-event-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.event-date, .create-event-button {
+    flex: 0 0 50px;
+    background-color: #424242;
+}
+
+.event-date {
+    color: #d6d5d5;
+}
+
+.saved-events {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(50px * 4); /* Limita a altura a 4 itens */
+    overflow-y: auto;
+    background-color: #161616;
+    border: 1px solid var(--matrix-border-color);
+}
+
+.saved-event {
+    flex: 0 0 50px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 0.5%;
+    padding-left: 2%;
+    background-color: var(--days-bg-color);
+}
+
+.event-title {
+    flex: 1;
+    font: var(--calendar-title-font);
+    color: #d6d5d5;
+}
+
+.material-icons {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #d6d5d5;
+    margin: 2%;
+    background-color: var(--days-bg-color);
+}
+
+.delete-event {
+    color: red;
+}
+
+.conclude-event {
+    color: green;
+}
+
+.create-event-button {
+    color: #7ABFB3;
+}
+
+/* Regra para aplicar estilos quando a altura é maior que a largura */
+@media (max-aspect-ratio: 1/1) {
+    .saved-events {
+        max-height: calc(50px * 10); /* Limita a altura a 10 itens */
+    }
 }
