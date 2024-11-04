@@ -42,6 +42,8 @@ main {
     justify-content: center;
     width: 100%;
     height: 100%;
+    overflow-y: hidden; /* Impede rolagem vertical */
+    overflow-x: hidden; /* Impede rolagem lateral */
 }
 
 .calendar-controls {
@@ -119,7 +121,6 @@ tbody {
     display: flex;
     flex-direction: column;
     width: 80%;
-    height: 22.5%;
     background-color: #fff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     z-index: 10;
@@ -147,22 +148,70 @@ tbody {
 }
 
 .event-date, .saved-events, .create-event-button {
-    flex-grow: 1; /* Permite que todos os itens flex cresçam igualmente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .event-date, .create-event-button {
-    background-color: #323232;
+    flex: 0 0 50px;
+    background-color: #424242;
 }
 
 .event-date {
-    text-align: center;
-    color: #c4c2c2;
+    color: #d6d5d5;
 }
 
 .saved-events {
+    display: flex;
+    flex-direction: column;
+    max-height: calc(50px * 4); /* Limita a altura a 4 itens */
+    overflow-y: auto;
     background-color: #161616;
+    border: 1px solid var(--matrix-border-color);
+}
+
+.saved-event {
+    flex: 0 0 50px;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 0.5%;
+    padding-left: 2%;
+    background-color: var(--days-bg-color);
+}
+
+.event-title {
+    flex: 1;
+    font: var(--calendar-title-font);
+    color: #d6d5d5;
+}
+
+.material-icons {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #d6d5d5;
+    margin: 2%;
+    background-color: var(--days-bg-color);
+}
+
+.delete-event {
+    color: red;
+}
+
+.conclude-event {
+    color: green;
 }
 
 .create-event-button {
     color: #7ABFB3;
+}
+
+/* Regra para aplicar estilos quando a altura é maior que a largura */
+@media (max-aspect-ratio: 1/1) {
+    .saved-events {
+        max-height: calc(50px * 10); /* Limita a altura a 10 itens */
+    }
 }

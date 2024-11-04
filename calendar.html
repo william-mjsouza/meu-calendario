@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calendário</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="calendar.css">
 </head>
 <body>
@@ -91,7 +92,28 @@
             <!-- Pop-up para criar evento -->
             <aside class="add-event" aria-labelledby="popup-title" role="dialog" hidden>
                 <span class="event-date">?? de 20??</span>
-                <span class="saved-events">?</span>
+                <div class="saved-events">
+                    <!-- Os que não tiverem marcadores de evento devem conter apenas 1 span vazio desse -->
+                    <span class="saved-event"></span>
+                    <!-- Criar dinamicamente via JS -->
+                    <span class="saved-event">
+                        <h3 class="event-title">Regar Hortaliças</h3>
+                        <button class="material-icons delete-event">close</button> <!-- Ícone de X (exclusão) -->
+                        <button class="material-icons conclude-event">check</button> <!-- Ícone de Check (Conclusão) -->
+                    </span>
+                    <!-- Criar dinamicamente via JS -->
+                    <span class="saved-event">
+                        <h3 class="event-title">Adubar Tomateiras</h3>
+                        <button class="material-icons delete-event">close</button> <!-- Ícone de X (exclusão) -->
+                        <button class="material-icons conclude-event">check</button> <!-- Ícone de Check (Conclusão) -->
+                    </span>
+                    <!-- Criar dinamicamente via JS -->
+                    <span class="saved-event">
+                        <h3 class="event-title">Controlar Pragas no Milho</h3>
+                        <button class="material-icons delete-event">close</button> <!-- Ícone de X (exclusão) -->
+                        <button class="material-icons conclude-event">check</button> <!-- Ícone de Check (Conclusão) -->
+                    </span>
+                </div>
                 <button type="submit" class="create-event-button">Criar</button>
             </aside>
         </section>
