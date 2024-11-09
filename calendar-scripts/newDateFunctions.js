@@ -13,7 +13,7 @@ export function getDayOfWeek(year, month, day) {
 
 export function getDayOfWeekName(dayOfWeek) {
     const dayOfWeekNames = [
-        "dom.", "seg.", "ter.", "qua.", "qui.", "sex.", "sáb."
+        "Dom.", "Seg.", "Ter.", "Qua.", "Qui.", "Sex.", "Sáb."
     ];
     return dayOfWeekNames[dayOfWeek];
 }
