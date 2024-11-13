@@ -5,7 +5,7 @@ import { calendarState } from './showCalendar.js'
 // Importa a função de abrir o pop-up de salvar evento
 import { openSaveEventPopup } from './saveEvent.js';
 
-// Seleciona o calendário, o pop-up de criar um evento no calendário, o botão dele e a sobreposição
+// Seleciona o calendário, o pop-up de criar um evento no calendário, o botão dele
 const calendar = document.querySelector('.calendar');
 const createEventPopup = document.querySelector('.add-event');
 const createEventButton = document.querySelector('.create-event-button');
@@ -27,7 +27,7 @@ function handleCreateEventClick() {
 
 // Função para abrir o pop-up de criar
 export function openCreateEventPopup() {
-    // Escurece o calendário
+    // Cria uma sobreposição
     overlay.classList.add('overlay');
     calendar.appendChild(overlay);
 

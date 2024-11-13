@@ -6,24 +6,38 @@ import { openCreateEventPopup } from './createEvent.js';
 // Constantes globais para armazenar a data atual (hoje)
 const currentDate = new Date();
 const YEAR = currentDate.getFullYear();
-const MONTH = currentDate.getMonth() + 1; // getMonth() retorna o mês de 0 a 11, então adicionamos 1
+const MONTH = currentDate.getMonth() + 1; // getMonth() retorna o mês de 0 a 11, então é adicionado 1
 const DAY = currentDate.getDate();
 
-// Objeto para armazenar o estado do calendário (dia, mês e ano selecionados no calendário)
+// Objeto constante global para armazenar o estado do calendário (dia, mês e ano exibidos)
 // Inicializa com o dia de hoje e é atualizado conforme algum dia for clicado/ tocado
 export const calendarState = {
     year: YEAR,
     month: MONTH,
-    day: DAY
+    day: DAY,
+    selectedDayElement: null,
+    dayEvents: [
+        // Exemplo de evento
+        {
+            title: "Exemplo de Evento",
+            description: "Descrição do evento",
+            start_date: new Date(2024, 11, 15),  // 15 de novembro de 2024
+            frequency: "weekly",
+            end_date: new Date(2026, 12, 14),
+            color: "var(--green-marker-bg-color)"
+        },
+        // Adicione outros eventos aqui
+    ]
 };
 
 // Captura os botões de controle do calendário
 const previousButton = document.querySelector('.previous-month');
 const nextButton = document.querySelector('.next-month');
 
-// Função para lidar com o toque em um dia do mês atual (para smartphones e tablets)
+// Função para lidar com o toque em um dia do mês (para smartphones e tablets)
 function handleDayTouch(event) {
-    // Atualiza o dia com o dia que foi clicado
+    // Atualiza o dia com o dia que foi tocado
+    calendarState.selectedDayElement = event.target;
     calendarState.day = event.target.textContent;
 
     // Previne o comportamento padrão para evitar que "tap-and-hold" interfira
@@ -37,6 +51,8 @@ function handleDayTouch(event) {
         event.target.style.backgroundColor = 'var(--days-bg-color)';
         // Abre o popup
         openCreateEventPopup();
+        // Listas o eventos do dia tocado
+        //listAllEvents();
         // Remove os event listeners após o toque
         removeTouchListeners();
     }
@@ -75,7 +91,7 @@ function handleDayTouch(event) {
     event.target.addEventListener('touchmove', handleTouchMove, { passive: true });
 }
 
-// Função para lidar com o clique em um dia do mês atual (para computadores)
+// Função para lidar com o clique em um dia do mês (para computadores)
 function handleDayClick(event) {
     // Se o botão pressionado do mouse não foi o esquerdo
     if (event.button !== 0) {
@@ -83,6 +99,7 @@ function handleDayClick(event) {
     }
 
     // Atualiza o dia com o dia que foi clicado
+    calendarState.selectedDayElement = event.target;
     calendarState.day = event.target.textContent;
     
     // Adiciona a cor de fundo ao pressionar o botão do mouse ou dedo
@@ -93,6 +110,8 @@ function handleDayClick(event) {
         event.target.style.backgroundColor = 'var(--days-bg-color)'; // Volta à cor original
         // Abre o pop-up
         openCreateEventPopup();
+        // Listas o eventos do dia clicado
+        //listAllEvents();
         // Remove os event listeners após o clique
         event.target.removeEventListener('mouseup', handleMouseUp);
         event.target.removeEventListener('mouseleave', handleMouseLeave);
@@ -109,7 +128,74 @@ function handleDayClick(event) {
     event.target.addEventListener('mouseleave', handleMouseLeave);
 }
 
-function showCalendar(month, year) {
+// Função para adicionar marcadores de evento 
+function addMarker(markersContainer) {
+    const marker = document.createElement("span");
+    marker.classList.add("marker");
+
+    const markersNumber = markersContainer.children.length;
+    // Preenche a segunda linha do grid primeiro, depois a primeira
+    if (markersNumber < 4) {
+        marker.style.gridArea = `2 / ${markersNumber + 1}`; // Linha 2, coluna 1 a 4
+    } 
+    else {
+        marker.style.gridArea = `1 / ${markersNumber - 3}`; // Linha 1, coluna 1 a 4
+    }
+
+    markersContainer.appendChild(marker);
+}
+
+function getEventsForDay(day, month, year) {
+    // Filtra os eventos armazenados no calendário
+    return calendarState.dayEvents.filter(event => {
+        const eventDate = event.start_date;
+        const eventEndDate = event.end_date; // Adicionando a data de fim do evento
+        const currentDate = new Date(year, month, day);
+
+        // Verifica se o evento começa no dia atual
+        if (eventDate.getFullYear() === year && eventDate.getMonth() === month && eventDate.getDate() === day) {
+            if (eventEndDate) {
+                // Se a data de fim existe, verifica se o dia atual está dentro do intervalo
+                return currentDate >= eventDate && currentDate <= eventEndDate;
+            } else {
+                return true; // Para eventos sem data de fim, considera o evento como válido
+            }
+        }
+
+        // Implementação para eventos recorrentes
+        if (eventEndDate && (currentDate < eventDate || currentDate > eventEndDate)) {
+            return false; // Se a data atual não está dentro do intervalo de repetição, descarta
+        }
+
+        if (event.frequency === "daily") {
+            return true; // Eventos diários ocorrem todos os dias
+
+        } else if (event.frequency === "weekly") {
+            // Eventos semanais: verifica se o dia da semana é o mesmo e a diferença em semanas é exata
+            const daysDifference = Math.floor((currentDate - eventDate) / (1000 * 60 * 60 * 24));
+            return currentDate.getDay() === eventDate.getDay() && daysDifference % 7 === 0;
+
+        } else if (event.frequency === "biweekly") {
+            // Eventos quinzenais (a cada duas semanas): mesmo dia da semana e diferença em semanas é par
+            const daysDifference = Math.floor((currentDate - eventDate) / (1000 * 60 * 60 * 24));
+            return currentDate.getDay() === eventDate.getDay() && (daysDifference / 7) % 2 === 0;
+
+        } else if (event.frequency === "monthly") {
+            // Eventos mensais: ocorre no mesmo dia do mês
+            return eventDate.getDate() === day;
+
+        } else if (event.frequency === "yearly") {
+            // Eventos anuais: ocorre no mesmo dia e mês
+            return eventDate.getMonth() === month && eventDate.getDate() === day;
+        }
+
+        return false; // Para eventos não recorrentes que não se encaixam nas condições
+    });
+}
+
+
+
+export function showCalendar(month, year) {
     const calendarTitle = document.querySelector('.calendar-title');
     const monthElement = document.querySelector('.month');
     const daysCells = monthElement.querySelectorAll('.days');
@@ -136,6 +222,17 @@ function showCalendar(month, year) {
         // Remove os escutadores de eventos antigos
         cell.removeEventListener('mousedown', handleDayClick);
         cell.removeEventListener('touchstart', handleDayTouch);
+
+        // Remove as divs de números e marcadores, se existirem
+        const dayNumber = cell.querySelector('.day-number');
+        if (dayNumber) {
+            cell.removeChild(dayNumber);
+        }
+
+        const markersContainer = cell.querySelector('.markers-container');
+        if (markersContainer) {
+            cell.removeChild(markersContainer);
+        }
     });
 
     // Preenche as células com os últimos dias do mês anterior
@@ -146,34 +243,60 @@ function showCalendar(month, year) {
 
     // Preenche os dias do mês
     for (let i = dayOfWeek; i < dayOfWeek + daysInMonth; i++) {
-        daysCells[i].textContent = dayCounter;
-        daysCells[i].style.backgroundColor = 'var(--days-bg-color)';    // Cor dos dias do mês atual
+        // Cria a div dos números
+        const dayNumber = document.createElement("div");
+        dayNumber.classList.add("day-number");
+        daysCells[i].appendChild(dayNumber);
+        dayNumber.textContent = dayCounter;
+        
+        // Cria a div dos marcadores
+        const markersContainer = document.createElement("div");
+        markersContainer.classList.add("markers-container");
+        daysCells[i].appendChild(markersContainer);
+
+        //daysCells[i].textContent = dayCounter;
+        daysCells[i].style.backgroundColor = 'var(--days-bg-color)';    // Cor de fundo
         daysCells[i].style.cursor = 'pointer';                          // Cursor apontador
 
         const currentDayOfWeek = (i % 7);
         // Pinta o texto dos dias de domingo com vermelho
         if (currentDayOfWeek === 0) {
-            daysCells[i].style.color = 'var(--sun-color)';
+            dayNumber.style.color = 'var(--sun-color)';
         }
         // Pinta o texto dos dias de sábado com azul
         else if (currentDayOfWeek === 6) {
-            daysCells[i].style.color = 'var(--sat-color)';
+            dayNumber.style.color = 'var(--sat-color)';
         }
 
-        // Verifica se é o dia de hoje, se for, é adicionada uma borda
+        // Verifica se é o dia de hoje, se for, adiciona uma borda
         if (dayCounter === DAY && month === MONTH && year === YEAR) {
             daysCells[i].style.border = '1px solid #899DD9';            // Borda azul clara
             daysCells[i].style.boxShadow = '0 0 0 2px #899DD9 inset';   // Sombra interna para criar um efeito de borda ("engrossa" a borda sem afetar o layout)
         }
 
+        // Verifica se tem evento, se tiver, adiciona os marcadores
+        //if (daysCells[i].classList.contains("marked-day")) {
+        //    addMarker(markersContainer);
+        //}
+        
+        // Verifica eventos para o dia
+        const eventsForDay = getEventsForDay(dayCounter, month, year);
+        if (eventsForDay.length > 0) {
+            daysCells[i].classList.add('marked-day');
+            // Adiciona até 8 marcadores
+            for (let j = 0; j < Math.min(eventsForDay.length, 8); j++) {
+                addMarker(markersContainer);
+            }
+        }
+
         // Adiciona um escutador de evento de segurar clique/ toque para os dias do mês
-        daysCells[i].addEventListener('mousedown', handleDayClick);     // Mouse segurando
-        daysCells[i].addEventListener('touchstart', handleDayTouch);    // Toque físico segurando (para celulares/ tablets)
+        daysCells[i].addEventListener('mousedown', handleDayClick);     // Mouse segurando (para computadores)
+        daysCells[i].addEventListener('touchstart', handleDayTouch);    // Toque segurando (para celulares/ tablets)
 
         dayCounter++;
     }
 
-    // Preenche as células restantes do próximo mês
+    // Preenche as células restantes com os primeiros dias próximo mês
     let nextDayCounter = 1;
     for (let i = dayOfWeek + daysInMonth; i < daysCells.length; i++) {
         daysCells[i].textContent = nextDayCounter;                            // Dias do mês seguinte
