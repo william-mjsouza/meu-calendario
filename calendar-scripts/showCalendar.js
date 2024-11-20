@@ -22,7 +22,7 @@ export const calendarState = {
             title: "Exemplo de Evento",
             description: "Descrição do evento",
             start_date: new Date(2024, 11, 15),  // 15 de novembro de 2024
-            frequency: "weekly",
+            frequency: "biweekly",
             end_date: new Date(2026, 12, 14),
             color: "var(--green-marker-bg-color)"
         },
@@ -129,9 +129,12 @@ function handleDayClick(event) {
 }
 
 // Função para adicionar marcadores de evento 
-function addMarker(markersContainer) {
+function addMarker(markersContainer, color) {
     const marker = document.createElement("span");
     marker.classList.add("marker");
+
+    // Define a cor do marcador com base no evento
+    marker.style.backgroundColor = color;
 
     const markersNumber = markersContainer.children.length;
     // Preenche a segunda linha do grid primeiro, depois a primeira
@@ -150,10 +153,14 @@ function getEventsForDay(day, month, year) {
     return calendarState.dayEvents.filter(event => {
         const eventDate = event.start_date;
         const eventEndDate = event.end_date; // Adicionando a data de fim do evento
-        const currentDate = new Date(year, month, day);
+        const currentDate = new Date(year, month, day); // Ajuste do mês para zero-indexado
 
         // Verifica se o evento começa no dia atual
-        if (eventDate.getFullYear() === year && eventDate.getMonth() === month && eventDate.getDate() === day) {
+        if (
+            eventDate.getFullYear() === year &&
+            eventDate.getMonth() === month &&
+            eventDate.getDate() === day
+        ) {
             if (eventEndDate) {
                 // Se a data de fim existe, verifica se o dia atual está dentro do intervalo
                 return currentDate >= eventDate && currentDate <= eventEndDate;
@@ -167,18 +174,34 @@ function getEventsForDay(day, month, year) {
             return false; // Se a data atual não está dentro do intervalo de repetição, descarta
         }
 
+        // Verifica se a data atual é posterior ou igual à data de início do evento
+        if (currentDate < eventDate) {
+            return false;
+        }
+
+        const timeDifference = currentDate.getTime() - eventDate.getTime();
+        const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
         if (event.frequency === "daily") {
-            return true; // Eventos diários ocorrem todos os dias
+            // Eventos diários ocorrem todos os dias
+            return true;
 
         } else if (event.frequency === "weekly") {
-            // Eventos semanais: verifica se o dia da semana é o mesmo e a diferença em semanas é exata
-            const daysDifference = Math.floor((currentDate - eventDate) / (1000 * 60 * 60 * 24));
-            return currentDate.getDay() === eventDate.getDay() && daysDifference % 7 === 0;
+            // Eventos semanais: verifica se o dia da semana é o mesmo
+            if (getDayOfWeek(year, month, day) !== getDayOfWeek(event.start_date.getFullYear(), event.start_date.getMonth(), event.start_date.getDate())) {
+                return false;
+            }
+            // Verifica se a diferença em semanas é zero ou um múltiplo de 1
+            const weeksDifference = Math.floor(daysDifference / 7);
+            return weeksDifference >= 0;
 
         } else if (event.frequency === "biweekly") {
-            // Eventos quinzenais (a cada duas semanas): mesmo dia da semana e diferença em semanas é par
-            const daysDifference = Math.floor((currentDate - eventDate) / (1000 * 60 * 60 * 24));
-            return currentDate.getDay() === eventDate.getDay() && (daysDifference / 7) % 2 === 0;
+            // Eventos quinzenais: mesmo dia da semana e diferença em semanas é par
+            if (getDayOfWeek(year, month, day) !== getDayOfWeek(event.start_date.getFullYear(), event.start_date.getMonth(), event.start_date.getDate())) {
+                return false;
+            }
+            const weeksDifference = Math.floor(daysDifference / 7);
+            return weeksDifference >= 0 && weeksDifference % 2 === 0;
 
         } else if (event.frequency === "monthly") {
             // Eventos mensais: ocorre no mesmo dia do mês
@@ -186,13 +209,12 @@ function getEventsForDay(day, month, year) {
 
         } else if (event.frequency === "yearly") {
             // Eventos anuais: ocorre no mesmo dia e mês
-            return eventDate.getMonth() === month && eventDate.getDate() === day;
+            return eventDate.getDate() === day && eventDate.getMonth() === month - 1;
         }
 
         return false; // Para eventos não recorrentes que não se encaixam nas condições
     });
 }
-
 
 
 export function showCalendar(month, year) {
@@ -285,7 +307,7 @@ export function showCalendar(month, year) {
             daysCells[i].classList.add('marked-day');
             // Adiciona até 8 marcadores
             for (let j = 0; j < Math.min(eventsForDay.length, 8); j++) {
-                addMarker(markersContainer);
+                addMarker(markersContainer, eventsForDay[j].color);
             }
         }
 

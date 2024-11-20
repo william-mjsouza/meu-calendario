@@ -27,6 +27,10 @@
     display: none; /* Começa oculto */
 }
 
+.close-save-event-popup.active {
+    display: flex;
+}
+
 .overlay.active, .save-event-popup.active {
     display: flex;
 }

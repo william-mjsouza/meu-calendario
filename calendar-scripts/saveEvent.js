@@ -25,14 +25,44 @@ const url_do_seu_servidor = "https://eocqr43t4jsm544.m.pipedream.net";
 // Seleciona o pop-up de salvar, o foumulário, o botão de selecionar a cor do evento, o pop-up de selecionar a cor do evento
 const saveEventPopup = document.querySelector('.save-event-popup');
 const saveEventFormGroup1 = document.querySelector('.save-event-form-group1');
-const saveEventButton = document.querySelector('.save-event-button');
+const eventName = document.querySelector('#event-name');
 const saveEventForm = document.querySelector('.save-event-form');
-
+const eventDescription = document.querySelector('#event-description');
 const dateTime = document.querySelectorAll('.event-date-time p');
 const colorPickerButton = document.querySelector('#color-picker');
 const colorPickerPopup = document.querySelector('.color-picker-popup');
 const colorPickerPopupButtons = document.querySelectorAll('.color-picker-button');
 //const overlay = document.createElement('div');
+
+// Função para lidar com o envio do formulário
+function handleSaveEventSubmit(event) {
+    event.preventDefault(); // Impede o envio padrão do formulário
+
+    console.log("Código adicional executado!");
+    saveEvent();    // Só pra testar
+
+    // Coleta os dados do formulário
+    const formData = new FormData(this);
+
+    // Envia os dados com AJAX
+    fetch(url_do_seu_servidor, {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log("Formulário enviado com sucesso!", data);
+        // Aqui você pode executar código adicional após o envio, como atualizar a interface
+        //saveEvent();
+    })
+    .catch(error => {
+        console.error("Erro ao enviar o formulário:", error);
+    });
+
+    // Remove o listener quando necessário
+    saveEventForm.removeEventListener("submit", handleSaveEventSubmit);
+}
+
 
 function closeSaveEventPopup() {
     // Esconde o pop-up
@@ -40,17 +70,17 @@ function closeSaveEventPopup() {
     // Remove
     colorPickerButton.removeEventListener('click', openColorPickerPopup);
     // Remove
-    saveEventButton.removeEventListener('click', saveEvent);
+    //saveEventButton.removeEventListener('click', saveEvent);
 }
 
 function saveEvent() {
     // Adiciona o marcador de evento no dia
     //calendarState.selectedDayElement.classList.add('marked-day');
     // Coleta os dados do formulário
-    const title = "adubar cenoura";
-    const description = "usar enxada";
-    const frequency = "";
-    const color = "red";
+    const title = eventName.value;
+    const description = eventDescription.value;
+    const frequency = "weekly";
+    const color = document.querySelector('#color-picker').style.backgroundColor;
     
     // Cria a data de início do evento com base no dia selecionado
     const startDate = new Date(calendarState.year, calendarState.month, calendarState.day);
@@ -67,7 +97,6 @@ function saveEvent() {
 
     // Adiciona o evento ao array de eventos
     calendarState.dayEvents.push(dayEvent);
-    
     
     // Atualiza o calendário
     showCalendar(calendarState.month, calendarState.year);
@@ -112,7 +141,7 @@ function openColorPickerPopup() {
     });
 
     // Adiciona o evento de clique na sobreposição para fechar o pop-up
-    colorPickerPopup.addEventListener('click', closeSaveEventPopup)
+    colorPickerPopup.addEventListener('click', closeColorPickerPopup)
 
     // Impede a propagação do clique no quadrado
     const colorPickerSquare = document.querySelector('.color-picker-popup-square');
@@ -134,28 +163,9 @@ export function openSaveEventPopup() {
     colorPickerButton.addEventListener('click', openColorPickerPopup);  //REMOVERRRRRR DPSSS
 
     // Adiciona o evento de clique no botão de salvar para salvar o evento
-    saveEventButton.addEventListener('click', saveEvent);
+    //saveEventButton.addEventListener('click', saveEvent);
 
     // Evento de submit no formulário
-    saveEventForm.addEventListener("submit", function(event) {
-        event.preventDefault(); // Impede o envio padrão do formulário
-        console.log("Código adicional executado!");
-    
-        // Coleta os dados do formulário
-        const formData = new FormData(this);
-    
-        // Envia os dados com AJAX
-        fetch(url_do_seu_servidor, {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log("Formulário enviado com sucesso!", data);
-            // Aqui você pode executar código adicional após o envio, como atualizar a interface
-        })
-        .catch(error => {
-            console.error("Erro ao enviar o formulário:", error);
-        });
-    });
+    // Adiciona o listener de forma clara e sem duplicação
+    saveEventForm.addEventListener("submit", handleSaveEventSubmit);
 }
