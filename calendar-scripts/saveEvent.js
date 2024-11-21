@@ -1,44 +1,29 @@
 // Importa a função que garante que a data esteja no formato DD/MM/AAAA
 import { formatDate } from './newDateFunctions.js'
 
+// Importa a função de abrir o pop-up de selecionar a cor do evento
+import { openColorPickerPopup, colorPickerButton } from './selectEventColor.js';
+
 // Importa o objeto que contém o estado atual do calendário
 import { calendarState } from './showCalendar.js'
 
 import { showCalendar } from './showCalendar.js';
-
-// Objeto que faz a correspondência entre a cor do marcador e a cor de fundo do grupo
-const colorMapping = {
-    "var(--red-marker-bg-color)": "var(--red-form-group-bg-color)",
-    "var(--orange-marker-bg-color)": "var(--orange-form-group-bg-color)",
-    "var(--yellow-marker-bg-color)": "var(--yellow-form-group-bg-color)",
-    "var(--green-marker-bg-color)": "var(--green-form-group-bg-color)",
-    "var(--blue-marker-bg-color)": "var(--blue-form-group-bg-color)",
-    "var(--pink-marker-bg-color)": "var(--pink-form-group-bg-color)",
-    "var(--black-marker-bg-color)": "var(--black-form-group-bg-color)",
-    "var(--gray-marker-bg-color)": "var(--gray-form-group-bg-color)",
-    "var(--white-marker-bg-color)": "var(--white-form-group-bg-color)"
-};
 
 // Endpoint do envio do formulário
 const url_do_seu_servidor = "https://eocqr43t4jsm544.m.pipedream.net";
 
 // Seleciona o pop-up de salvar, o foumulário, o botão de selecionar a cor do evento, o pop-up de selecionar a cor do evento
 const saveEventPopup = document.querySelector('.save-event-popup');
-const saveEventFormGroup1 = document.querySelector('.save-event-form-group1');
 const eventName = document.querySelector('#event-name');
 const saveEventForm = document.querySelector('.save-event-form');
 const eventDescription = document.querySelector('#event-description');
 const dateTime = document.querySelectorAll('.event-date-time p');
-const colorPickerButton = document.querySelector('#color-picker');
-const colorPickerPopup = document.querySelector('.color-picker-popup');
-const colorPickerPopupButtons = document.querySelectorAll('.color-picker-button');
-//const overlay = document.createElement('div');
 
 // Função para lidar com o envio do formulário
 function handleSaveEventSubmit(event) {
     event.preventDefault(); // Impede o envio padrão do formulário
 
-    console.log("Código adicional executado!");
+    console.log("Código adicional executado!"); // Só pra testar
     saveEvent();    // Só pra testar
 
     // Coleta os dados do formulário
@@ -59,95 +44,42 @@ function handleSaveEventSubmit(event) {
         console.error("Erro ao enviar o formulário:", error);
     });
 
-    // Remove o listener quando necessário
+    // Remove o escutador de evento
     saveEventForm.removeEventListener("submit", handleSaveEventSubmit);
 }
-
 
 function closeSaveEventPopup() {
     // Esconde o pop-up
     saveEventPopup.classList.remove('active');
-    // Remove
+
+    // Remove o escutador de evento
     colorPickerButton.removeEventListener('click', openColorPickerPopup);
-    // Remove
-    //saveEventButton.removeEventListener('click', saveEvent);
 }
 
 function saveEvent() {
     // Adiciona o marcador de evento no dia
     //calendarState.selectedDayElement.classList.add('marked-day');
-    // Coleta os dados do formulário
-    const title = eventName.value;
-    const description = eventDescription.value;
-    const frequency = "weekly";
-    const color = document.querySelector('#color-picker').style.backgroundColor;
     
-    // Cria a data de início do evento com base no dia selecionado
-    const startDate = new Date(calendarState.year, calendarState.month, calendarState.day);
-    
-    // Cria o objeto do evento
+    // Cria o objeto do evento com os dados coletados do formulário
     const dayEvent = {
-        title,
-        description,
-        start_date: startDate,
-        frequency,
+        title: eventName.value,
+        description: eventDescription.value,
+        start_date: new Date(calendarState.year, calendarState.month, calendarState.day),   // A data é pega automaticamente
+        frequency: "weekly",
         end_date: null,  // Pode ser definido se houver um campo de data final
-        color
+        color: colorPickerButton.style.backgroundColor
     };
 
     // Adiciona o evento ao array de eventos
     calendarState.dayEvents.push(dayEvent);
+    console.log(calendarState.dayEvents);
     
+    // Sai do "modo edição"
+
     // Atualiza o calendário
     showCalendar(calendarState.month, calendarState.year);
     // Fecha o pop-up
     closeSaveEventPopup();
-}
-
-function closeColorPickerPopup() {
-    colorPickerPopupButtons.forEach(button => {
-        // Remove o evento
-        button.removeEventListener('click', selectColor);
-    });
-
-    colorPickerPopup.classList.remove('active');
-    //overlay.classList.remove('active');
-    colorPickerPopup.removeEventListener('click', closeSaveEventPopup)
-}
-
-function selectColor(event) {
-    // Atualiza a cor de fundo do botão de edição de cor com a cor do botão clicado
-    const markerColor = event.target.style.backgroundColor;
-    colorPickerButton.style.backgroundColor = markerColor;
-    // Atualiza a cor de fundo do grupo
-    saveEventFormGroup1.style.backgroundColor = colorMapping[markerColor];
-
-    // Fecha o pop-up
-    closeColorPickerPopup();
-}
-
-function openColorPickerPopup() {
-    // Cria uma sobreposição
-    //overlay.classList.add('overlay');
-    //saveEventForm.appendChild(overlay);
-
-    // Mostra o pop-up e a sobreposição
-    colorPickerPopup.classList.add('active');
-    //overlay.classList.add('active');
-
-    // Adiciona o evento de clique nos botões
-    colorPickerPopupButtons.forEach(button => {
-        button.addEventListener('click', selectColor);
-    });
-
-    // Adiciona o evento de clique na sobreposição para fechar o pop-up
-    colorPickerPopup.addEventListener('click', closeColorPickerPopup)
-
-    // Impede a propagação do clique no quadrado
-    const colorPickerSquare = document.querySelector('.color-picker-popup-square');
-    colorPickerSquare.addEventListener('click', (event) => {
-        event.stopPropagation();
-    });
 }
 
 // Função para abrir o pop-up de salvar
@@ -160,12 +92,8 @@ export function openSaveEventPopup() {
     dateTime[1].textContent = 'Manhã'   // Valor padrão
 
     // Adiciona o evento de clique no botão de selecionar cor para abrir o pop-up de selecionar a cor do evento
-    colorPickerButton.addEventListener('click', openColorPickerPopup);  //REMOVERRRRRR DPSSS
+    colorPickerButton.addEventListener('click', openColorPickerPopup);
 
-    // Adiciona o evento de clique no botão de salvar para salvar o evento
-    //saveEventButton.addEventListener('click', saveEvent);
-
-    // Evento de submit no formulário
-    // Adiciona o listener de forma clara e sem duplicação
+    // Adiciona um escutador de evento de submissão no próprio formulário para tratar o envio dele
     saveEventForm.addEventListener("submit", handleSaveEventSubmit);
 }

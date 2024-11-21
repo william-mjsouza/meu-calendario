@@ -21,8 +21,8 @@ function closeCreateEventPopup() {
 
 // Função para lidar com o clique no botão "Criar"
 function handleCreateEventClick() {
-    closeCreateEventPopup();                                                          // Fecha o pop-up de criar
-    openSaveEventPopup(calendarState.year, calendarState.month, calendarState.day);   // Abre o pop-up de salvar
+    closeCreateEventPopup();                  // Fecha o pop-up de criar
+    openSaveEventPopup();                     // Abre o pop-up de salvar
 }
 
 // Função para abrir o pop-up de criar
