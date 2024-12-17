@@ -2,7 +2,7 @@
 import { getDayOfWeek, getDaysInMonth, getMonthName } from './newDateFunctions.js';
 // Importa a função de exibição do pop-up de adicionar evento no calendário
 import { openCreateEventPopup } from './createEvent.js';
-
+// Importa a função de pegar os eventos do dia e de adicionar marcadores nos dias com eventos
 import { getEventsForDay, addMarker } from './markDays.js'
 
 // Constantes globais para armazenar a data atual (hoje)
@@ -28,7 +28,7 @@ export const calendarState = {
             end_date: new Date(2024, 12, 30),
             color: "var(--green-marker-bg-color)"
         },
-        // Adicione outros eventos aqui
+        // Adicione outros eventos aqui para testar
     ]
 };
 
@@ -112,7 +112,7 @@ function handleDayClick(event) {
         event.target.style.backgroundColor = 'var(--days-bg-color)'; // Volta à cor original
         // Abre o pop-up
         openCreateEventPopup();
-        // Listas o eventos do dia clicado
+        // Lista todos os eventos do dia clicado
         //listAllEvents();
         // Remove os event listeners após o clique
         event.target.removeEventListener('mouseup', handleMouseUp);

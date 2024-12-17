@@ -65,7 +65,7 @@ export function getEventsForDay(day, month, year) {
 
         } else if (event.frequency === "yearly") {
             // Eventos anuais: ocorre no mesmo dia e mês
-            return eventDate.getDate() === day && eventDate.getMonth() === month - 1;
+            return eventDate.getDate() === day && eventDate.getMonth() === month;
         }
 
         return false; // Para eventos não recorrentes que não se encaixam nas condições

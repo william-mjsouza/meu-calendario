@@ -94,6 +94,8 @@
 }
 
 .create-event-button {
+    position: relative; /* Pra fazer a animação */
+    overflow: hidden;   /* Pra fazer a animação */
     color: #7ABFB3;
     cursor: pointer;
 }

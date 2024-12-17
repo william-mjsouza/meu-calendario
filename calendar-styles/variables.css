@@ -55,3 +55,30 @@
     box-sizing: border-box;
     font-weight: normal; /* Remove o negrito padrão do `<th>` */
 }
+
+/* Garante que o ripple não seja disparado junto com efeitos nativos */
+.create-event-button, button, .any-touch-element {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: none;
+}
+
+.ripple-hold {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+    will-change: transform, opacity;
+}
+
+/* Agora a expansão é mais rápida (0.5s) */
+.ripple-expand {
+    transition: transform 0.5s ease-out;
+}
+
+/* Agora o encolhimento é mais rápido (0.6s) */
+.ripple-collapse {
+    transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+}
