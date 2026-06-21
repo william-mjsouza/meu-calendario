@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="calendar-styles/calendar.css">
     <link rel="stylesheet" href="calendar-styles/createEventPopup.css">
     <link rel="stylesheet" href="calendar-styles/saveEventPopup.css">
+    <link rel="stylesheet" href="calendar-styles/repetitionConfigPopup.css">
+    <link rel="stylesheet" href="calendar-styles/endDatePicker.css">
 </head>
 <body>
     <main>
@@ -95,26 +97,9 @@
             <aside class="add-event" aria-labelledby="popup-title" role="dialog" hidden>
                 <span class="event-date">?? de 20??</span>
                 <div class="saved-events">
-                    <!-- Os que não tiverem marcadores de evento devem conter apenas 1 span vazio desse -->
-                    <span class="saved-event"></span>
-                    <!-- Deve-se adicionar esses spans dinamicamente via JS
-                    <span class="saved-event">
-                        <h3 class="event-title">Regar Hortaliças</h3>
-                        <button class="material-icons delete-event">close</button>
-                        <button class="material-icons conclude-event">check</button> 
-                    </span>
-                    <span class="saved-event">
-                        <h3 class="event-title">Adubar Tomateiras</h3>
-                        <button class="material-icons delete-event">close</button>
-                        <button class="material-icons conclude-event">check</button>
-                    </span>
-                    <span class="saved-event">
-                        <h3 class="event-title">Controlar Pragas no Milho</h3>
-                        <button class="material-icons delete-event">close</button>
-                        <button class="material-icons conclude-event">check</button>
-                    </span>
-                     -->
-                </div> 
+                    <!-- Os spans de eventos salvos são inseridos dinamicamente via JS (ver createEvent.js).
+                         Quando não há eventos no dia, fica apenas um span vazio como espaço reservado. -->
+                </div>
                 <button type="button" class="create-event-button">Criar</button>
             </aside>
             <!-- Pop-up para salvar um novo evento no dia que foi clicado -->
@@ -128,7 +113,7 @@
                         <!-- Botão para salvar o evento, visível apenas enquanto está editando -->
                         <button type="submit" class="material-icons save-event-button" aria-label="Salvar evento">check</button>
                         <!-- Campo de título do evento: visível em modo de edição e substituído por texto fixo após o salvamento -->
-                        <input type="text" name="event-name" id="event-name" maxlength="50" placeholder="Título" aria-labelledby="event-name-label" autocomplete="off" required>
+                        <input type="text" name="event-name" id="event-name" maxlength="50" placeholder="Título" aria-labelledby="event-name-label" autocomplete="off">
                         <h3 class="event-name" id="event-name-label" hidden>?</h3>
                         <!-- Botão para escolher cor, visível apenas enquanto está editando -->
                         <button type="button" id="color-picker" aria-label="Escolher cor"></button>
@@ -143,12 +128,12 @@
                         <span class="event-date-time">
                             <i class="material-icons" aria-hidden="true">event</i> <!-- Ícone de calendário -->
                             <p aria-label="Data do Evento">??/??/20???</p> <!-- Data do dia clicado -->
-                            <i class="material-icons clock" aria-hidden="true">access_time</i> <!-- Ícone de relógio -->
-                            <p aria-label="Horário do Evento">?</p> <!-- Período do evento (manhã, tarde, dia todo) -->
+                            <!-- Ícone de recorrência: só aparece quando a frequência for diferente de "Uma só vez" -->
+                            <i class="material-icons recurrence-icon" aria-label="Evento recorrente" hidden>repeat</i>
                         </span>
                     </div>
                     <!-- Campo de descrição do evento: visível em modo de edição e substituído por texto fixo após o salvamento -->
-                    <textarea name="event-description" id="event-description" placeholder="Descrição" aria-labelledby="event-description-label" autocomplete="off" required></textarea>
+                    <textarea name="event-description" id="event-description" placeholder="Descrição" aria-labelledby="event-description-label" autocomplete="off"></textarea>
                     <p class="event-description" id="event-description-label" hidden>?</p>
                 </form>
                 <aside class="color-picker-popup" hidden>
@@ -166,6 +151,71 @@
                         </div>
                     </div>
                 </aside>
+            </aside>
+            <!-- Pop-up para configurar a repetição do evento -->
+            <aside class="repetition-config-popup" aria-label="Configurar Repetição" hidden>
+                <form class="repetition-config-form">
+                    <!-- Botão para descartar (resetar) as configurações de repetição -->
+                    <button type="button" class="discard-repetition-button">Descartar</button>
+                    <!-- Grupo "Quando": data do evento que está sendo criado -->
+                    <div class="repetition-config-group">
+                        <label class="repetition-config-label">Quando</label>
+                        <span class="repetition-when-weekday">?</span>
+                        <span class="repetition-when-date">
+                            <i class="material-icons" aria-hidden="true">event</i>
+                            <span class="repetition-when-date-text">? de ??? de 20??</span>
+                        </span>
+                    </div>
+                    <!-- Grupo "Repetição": frequência com que o evento se repete -->
+                    <div class="repetition-config-group">
+                        <label class="repetition-config-label" for="repetition-frequency">Repetição <i class="material-icons" aria-hidden="true">sync_alt</i></label>
+                        <select id="repetition-frequency" class="repetition-config-select">
+                            <option value="once">Uma só vez</option>
+                            <option value="daily">Diariamente</option>
+                            <option value="weekly">Semanalmente</option>
+                            <option value="biweekly">Quinzenalmente</option>
+                            <option value="monthly">Mensalmente</option>
+                            <option value="yearly">Anualmente</option>
+                        </select>
+                    </div>
+                    <!-- Grupo "Término": data em que a repetição deixa de ocorrer ("Nunca" por padrão) -->
+                    <div class="repetition-config-group">
+                        <label class="repetition-config-label">Término</label>
+                        <span class="repetition-end">
+                            <i class="material-icons" aria-hidden="true">event</i>
+                            <span class="repetition-end-text">Nunca</span>
+                        </span>
+                    </div>
+                    <!-- Botões inferiores: cancelar mantém o estado anterior, "Pronto" salva as escolhas -->
+                    <div class="repetition-config-actions">
+                        <button type="button" class="cancel-repetition-button">Cancelar</button>
+                        <button type="submit" class="confirm-repetition-button">Pronto</button>
+                    </div>
+                </form>
+            </aside>
+            <!-- Pop-up customizado para escolher a data de término da repetição -->
+            <aside class="end-date-picker-popup" aria-label="Escolher data de término" hidden>
+                <div class="end-date-picker-card">
+                    <header class="end-date-picker-header">
+                        <span class="end-date-picker-year">2026</span>
+                        <h2 class="end-date-picker-selected">Dom., 21 de jun.</h2>
+                    </header>
+                    <div class="end-date-picker-nav">
+                        <button type="button" class="end-date-picker-prev" aria-label="Mês anterior">&#9664;</button>
+                        <span class="end-date-picker-month-title">junho de 2026</span>
+                        <button type="button" class="end-date-picker-next" aria-label="Próximo mês">&#9654;</button>
+                    </div>
+                    <div class="end-date-picker-weekdays">
+                        <span>D</span><span>S</span><span>T</span><span>Q</span><span>Q</span><span>S</span><span>S</span>
+                    </div>
+                    <div class="end-date-picker-grid">
+                        <!-- Os dias são inseridos dinamicamente via JS -->
+                    </div>
+                    <div class="end-date-picker-actions">
+                        <button type="button" class="end-date-picker-cancel">Cancelar</button>
+                        <button type="button" class="end-date-picker-ok">OK</button>
+                    </div>
+                </div>
             </aside>
         </section>
     </main>

@@ -53,35 +53,96 @@
 .saved-events {
     display: flex;
     flex-direction: column;
-    max-height: calc(50px * 4); /* Limita a altura a 4 itens */
+    justify-content: flex-start; /* Sobrescreve o center herdado para não cortar itens do topo ao rolar */
+    align-items: stretch;        /* Itens ocupam toda a largura do container */
+    gap: 0.25rem;
+    max-height: 16rem; /* Limita a altura (~4 itens com altura ~3.5rem) */
     overflow-y: auto;
+    overflow-x: hidden;
     background-color: #161616;
     border: 1px solid var(--matrix-border-color);
+    /* Barra de rolagem fina, semi-transparente, no estilo da barra nativa de navegadores mobile (Firefox) */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
+/* Barra de rolagem fina, semi-transparente, no estilo da barra nativa de navegadores mobile (WebKit/Blink) */
+.saved-events::-webkit-scrollbar {
+    width: 0.35rem;
+}
+
+.saved-events::-webkit-scrollbar-track {
+    background: transparent; /* Sem trilho visível, como nas barras mobile */
+}
+
+.saved-events::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: 999px; /* Totalmente arredondada */
+}
+
+.saved-events::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.55);
 }
 
 .saved-event {
-    flex: 0 0 50px;
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     width: 100%;
-    margin-bottom: 0.5%;
-    padding: 0.5% 0.5% 0.5% 2%;
+    min-height: 3rem;
+    padding: 0.4rem 0.5rem;
     background-color: var(--days-bg-color);
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* A faixa lateral colorida só aparece em spans que contêm um evento real,
+   nunca no span vazio reservado para dias sem eventos */
+.saved-event.has-event {
+    border-left: 0.35rem solid var(--event-day-marker-bg-color); /* Cor padrão sobrescrita via inline style com a cor real do evento */
 }
 
 .event-title {
-    flex: 1;
-    font: var(--calendar-title-font);
+    flex: 1 1 0;
+    min-width: 0; /* Necessário para que o ellipsis funcione em flex */
+    padding-left: 0.75rem;
+    font-family: var(--calendar-title-font);
+    font-size: 1.05rem;
     color: #d6d5d5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .delete-event, .conclude-event {
+    flex: 0 0 auto;
     display: block;
+    width: 2rem;
+    height: 2rem;
     font-size: 1.5rem;
     font-weight: bold;
     color: #d6d5d5;
-    padding: 2%;
+    padding: 0.25rem;
     background-color: var(--days-bg-color);
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+}
+
+/* Estado de evento concluído: título riscado e atenuado, check também atenuado
+   (o botão de excluir permanece em destaque para continuar acionável) */
+.saved-event.concluded .event-title {
+    text-decoration: line-through;
+    text-decoration-thickness: 0.12rem;
+    opacity: 0.55;
+}
+
+.saved-event.concluded .conclude-event {
+    opacity: 0.45;
+}
+
+.saved-event.concluded {
+    /* Atenua sutilmente o fundo todo do item para reforçar o estado "feito" */
+    background-color: #0a0a0a;
 }
 
 .delete-event {
@@ -104,9 +165,57 @@
     background-color: var(--days-clicked-bg-color);
 }
 
-/* Regra para aplicar estilos quando a altura é maior que a largura */
+/* Regra para aplicar estilos quando a altura é maior que a largura (celular em modo retrato) */
 @media (max-aspect-ratio: 1/1) {
     .saved-events {
-        max-height: calc(50px * 10); /* Limita a altura a 10 itens */
+        max-height: 35rem; /* Permite mostrar mais itens em telas verticais */
+    }
+}
+
+/* Tablets e telas médias: ajusta proporções do pop-up e dos itens da lista */
+@media (min-width: 600px) {
+    .add-event {
+        width: 70%;
+    }
+
+    .saved-event {
+        min-height: 3.25rem;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .event-title {
+        font-size: 1.15rem;
+        padding-left: 1rem;
+    }
+}
+
+/* Telas grandes (computadores): cartão centralizado com largura limitada e itens maiores */
+@media (min-width: 900px) {
+    .add-event {
+        width: min(50%, 32rem);
+    }
+
+    .saved-events {
+        max-height: 20rem;
+    }
+
+    .saved-event {
+        min-height: 3.5rem;
+        padding: 0.6rem 1rem;
+    }
+
+    .saved-event.has-event {
+        border-left-width: 0.4rem;
+    }
+
+    .event-title {
+        font-size: 1.25rem;
+        padding-left: 1.1rem;
+    }
+
+    .delete-event, .conclude-event {
+        width: 2.25rem;
+        height: 2.25rem;
+        font-size: 1.6rem;
     }
 }

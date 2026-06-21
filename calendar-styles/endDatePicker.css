@@ -1,0 +1,197 @@
+@import url('variables.css');
+
+/* Pop-up de escolha da data de término da repetição
+   Estilo inspirado no date picker nativo do Android, mas adaptado à paleta do app */
+
+.end-date-picker-popup {
+    position: absolute; /* Posicionado em relação ao .calendar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 20; /* Acima do pop-up de configuração de repetição */
+    background-color: rgba(0, 0, 0, 0.5); /* Backdrop que deixa o conteúdo de trás visível */
+}
+
+.end-date-picker-popup[hidden] {
+    display: none; /* Permite ocultar usando o atributo hidden */
+}
+
+.end-date-picker-popup.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Cartão central que contém todo o picker */
+.end-date-picker-card {
+    display: flex;
+    flex-direction: column;
+    width: min(90%, 22rem);
+    max-height: 90%;
+    overflow-y: auto;   /* Permite rolagem como fallback (ex.: paisagem em telas baixas) */
+    overflow-x: hidden;
+    background-color: #181616;
+    /* Barra de rolagem fina, estilo mobile */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
+.end-date-picker-card::-webkit-scrollbar { width: 0.35rem; }
+.end-date-picker-card::-webkit-scrollbar-track { background: transparent; }
+.end-date-picker-card::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+}
+
+/* Cabeçalho com ano pequeno e data selecionada grande */
+.end-date-picker-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.25rem 1.5rem;
+    background-color: #646464;
+    font-family: var(--calendar-title-font);
+    color: var(--calendar-title-color);
+}
+
+.end-date-picker-year {
+    font-size: 1rem;
+    opacity: 0.8;
+}
+
+.end-date-picker-selected {
+    font-size: 1.85rem;
+    font-weight: bold;
+    line-height: 1.1;
+}
+
+/* Linha de navegação entre meses */
+.end-date-picker-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem 0.25rem 1rem;
+    font-family: var(--calendar-title-font);
+    color: var(--calendar-title-color);
+}
+
+.end-date-picker-prev, .end-date-picker-next {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.85rem;
+    color: var(--calendar-title-color);
+    background-color: transparent;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.end-date-picker-prev:active, .end-date-picker-next:active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.end-date-picker-month-title {
+    font-size: 1rem;
+}
+
+/* Cabeçalho dos dias da semana */
+.end-date-picker-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    padding: 0 0.5rem;
+    font-family: var(--calendar-title-font);
+    font-size: 0.9rem;
+    color: var(--days-of-week-color);
+    text-align: center;
+}
+
+.end-date-picker-weekdays span {
+    padding: 0.4rem 0;
+}
+
+/* Grade dos dias do mês */
+.end-date-picker-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: 2.4rem; /* Altura fixa por linha para que 6 linhas caibam sem rolagem */
+    gap: 0.2rem;
+    padding: 0.25rem 0.5rem 0.75rem 0.5rem;
+}
+
+.end-date-picker-day {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0 auto; /* Centraliza horizontalmente o círculo dentro da célula do grid */
+    font-family: var(--calendar-title-font);
+    font-size: 0.95rem;
+    color: var(--calendar-title-color);
+    background-color: transparent;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.end-date-picker-day:active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dia que pertence ao mês exibido mas não é selecionável (fora do intervalo) — mantido para futura extensão */
+.end-date-picker-day.empty {
+    cursor: default;
+    pointer-events: none;
+    color: transparent;
+}
+
+/* Dia selecionado: círculo destacado com a cor de acento do app */
+.end-date-picker-day.selected {
+    background-color: var(--event-add-button-bg-color);
+    color: var(--days-bg-color);
+    font-weight: bold;
+}
+
+/* Botões inferiores Cancelar / OK */
+.end-date-picker-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    padding: 0.75rem 1.5rem 1rem 1.5rem;
+}
+
+.end-date-picker-cancel, .end-date-picker-ok {
+    font-family: var(--calendar-title-font);
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--event-add-button-bg-color);
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.end-date-picker-cancel:active, .end-date-picker-ok:active {
+    opacity: 0.6;
+}
+
+/* Telas largas em paisagem: aproveita melhor o espaço */
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+    .end-date-picker-card {
+        width: min(60%, 26rem);
+    }
+
+    .end-date-picker-selected {
+        font-size: 2rem;
+    }
+
+    .end-date-picker-grid {
+        grid-auto-rows: 2.7rem;
+    }
+
+    .end-date-picker-day {
+        width: 2.7rem;
+        height: 2.7rem;
+        font-size: 1rem;
+    }
+}

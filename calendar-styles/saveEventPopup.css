@@ -123,8 +123,12 @@ input, textarea {
     font-size: 1rem;
 }
 
-.clock {
+.recurrence-icon {
     padding-left: 5px;
+}
+
+.recurrence-icon[hidden] {
+    display: none; /* Permite ocultar usando o atributo hidden */
 }
 
 .save-event-form textarea {

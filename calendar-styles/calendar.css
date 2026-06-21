@@ -27,6 +27,7 @@ main {
     align-items: center;
     justify-content: space-around;
     width: 100%;
+    pointer-events: none; /* Permite que cliques no espaço entre os botões alcancem o título atrás */
 }
 
 .previous-month, .next-month {
@@ -35,6 +36,7 @@ main {
     border: none;
     font-size: 1em;
     cursor: pointer;
+    pointer-events: auto; /* Botões continuam clicáveis normalmente */
 }
 
 .month {
@@ -52,9 +54,18 @@ main {
 }
 
 .calendar-title {
+    position: relative; /* Pra conter o efeito ripple */
+    display: inline-block;
+    overflow: hidden;   /* Pra recortar o ripple ao retângulo do título */
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px; /* Suaviza as bordas do ripple */
     font-family: var(--calendar-title-font);
     font-size: 1em;
     color: var(--calendar-title-color);
+    /* Suprime o highlight nativo em mobile para não competir com o ripple */
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    touch-action: none;
 }
 
 .days-of-the-week-columns {

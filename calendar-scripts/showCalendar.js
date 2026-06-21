@@ -4,6 +4,10 @@ import { getDayOfWeek, getDaysInMonth, getMonthName } from './newDateFunctions.j
 import { openCreateEventPopup } from './createEvent.js';
 // Importa a função de pegar os eventos do dia e de adicionar marcadores nos dias com eventos
 import { getEventsForDay, addMarker } from './markDays.js'
+// Importa o pop-up de seleção de data (reutilizado para navegar rapidamente entre meses)
+import { openEndDatePicker } from './endDatePicker.js';
+// Importa o efeito ripple para aplicar no título do calendário (mesmo padrão do botão "Criar")
+import { applyHoldRippleEffect } from './animations/rippleEffect.js';
 
 // Constantes globais para armazenar a data atual (hoje)
 const currentDate = new Date();
@@ -19,13 +23,21 @@ export const calendarState = {
     day: DAY,
     selectedDayElement: null,
     dayEvents: [
-        // Exemplo de evento
+        // Exemplos de evento (lembrando que no Date do JS o mês é 0-indexado: 0 = janeiro, ..., 11 = dezembro)
         {
             title: "Exemplo de Evento",
             description: "Descrição do evento",
-            start_date: new Date(2024, 11, 15),  // 15 de novembro de 2024
+            start_date: new Date(2024, 10, 15),  // 15 de novembro de 2024
             frequency: "biweekly",
-            end_date: new Date(2024, 12, 30),
+            end_date: new Date(2025, 0, 30),     // 30 de janeiro de 2025
+            color: "var(--green-marker-bg-color)"
+        },
+        {
+            title: "Exemplo de Evento",
+            description: "Descrição do evento",
+            start_date: new Date(2025, 6, 29),   // 29 de julho de 2025
+            frequency: "daily",
+            end_date: new Date(2025, 11, 30),    // 30 de dezembro de 2025
             color: "var(--green-marker-bg-color)"
         },
         // Adicione outros eventos aqui para testar
@@ -35,6 +47,7 @@ export const calendarState = {
 // Captura os botões de controle do calendário
 const previousButton = document.querySelector('.previous-month');
 const nextButton = document.querySelector('.next-month');
+const calendarTitle = document.querySelector('.calendar-title');
 
 // Função para lidar com o toque em um dia do mês (para smartphones e tablets)
 function handleDayTouch(event) {
@@ -260,6 +273,20 @@ function main() {
             calendarState.month++;      // Apenas aumenta o mês
         }
         updateCalendar(calendarState.month, calendarState.year); // Atualiza o calendário
+    });
+
+    // Clique no título abre o picker de data para navegar rapidamente para um mês específico
+    // Usa o mesmo efeito ripple do botão "Criar" — o callback é disparado ao soltar dentro do elemento
+    calendarTitle.style.cursor = 'pointer';
+    applyHoldRippleEffect(calendarTitle, () => {
+        // Usa o primeiro dia do mês atualmente exibido como data inicial do picker
+        const initialDate = new Date(calendarState.year, calendarState.month - 1, 1);
+        openEndDatePicker(initialDate, (chosenDate) => {
+            if (!chosenDate) return;
+            calendarState.year = chosenDate.getFullYear();
+            calendarState.month = chosenDate.getMonth() + 1;
+            updateCalendar(calendarState.month, calendarState.year);
+        });
     });
 
     // Inicializa o calendário na primeira chamada com o mês e o ano atuais

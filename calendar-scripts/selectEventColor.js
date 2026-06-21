@@ -11,7 +11,7 @@ const colorMapping = {
     "var(--white-marker-bg-color)": "var(--white-form-group-bg-color)"
 };
 
-const saveEventFormGroup1 = document.querySelector('.save-event-form-group1');
+export const saveEventFormGroup1 = document.querySelector('.save-event-form-group1');
 export const colorPickerButton = document.querySelector('#color-picker');
 const colorPickerPopup = document.querySelector('.color-picker-popup');
 const colorPickerSquare = document.querySelector('.color-picker-popup-square');
@@ -30,12 +30,17 @@ function closeColorPickerPopup() {
 
 // Função para trocar a cor de fundo do grupo a cada clique nos botões
 function changeGroupBackgroudColor(event) {
-    // Atualiza a cor de fundo do botão de edição de cor com a cor do botão clicado
-    const markerColor = event.target.style.backgroundColor;
-    colorPickerButton.style.backgroundColor = markerColor;
-    
-    // Atualiza a cor de fundo do grupo com a cor correspondente
-    saveEventFormGroup1.style.backgroundColor = colorMapping[markerColor];
+    // Lê a cor do botão como string literal (ex.: "var(--yellow-marker-bg-color)") para usar no mapeamento
+    const markerColorVar = event.target.style.backgroundColor;
+    // Resolve a cor para RGB via getComputedStyle, evitando que valores com var(--...) permaneçam como
+    // string literal e quebrem outras propriedades CSS (como border-left-color no primeiro render)
+    const markerColorRgb = getComputedStyle(event.target).backgroundColor;
+
+    // Atualiza a cor de fundo do botão de edição de cor com a cor RGB já resolvida
+    colorPickerButton.style.backgroundColor = markerColorRgb;
+
+    // Atualiza a cor de fundo do grupo com a cor correspondente (mapeamento usa a string com var(...))
+    saveEventFormGroup1.style.backgroundColor = colorMapping[markerColorVar];
 
     // Fecha o pop-up
     closeColorPickerPopup();
