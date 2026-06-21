@@ -58,6 +58,14 @@
 .end-date-picker-year {
     font-size: 1rem;
     opacity: 0.8;
+    cursor: pointer;
+    user-select: none;
+    align-self: flex-start;
+    padding: 0.1rem 0.25rem;
+}
+
+.end-date-picker-year:active {
+    opacity: 1;
 }
 
 .end-date-picker-selected {
@@ -151,6 +159,61 @@
     background-color: var(--event-add-button-bg-color);
     color: var(--days-bg-color);
     font-weight: bold;
+}
+
+/* Lista de anos exibida em "modo seleção de ano" no lugar da grade de dias */
+.end-date-picker-year-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    overflow-y: auto;
+    /* Barra de rolagem fina no mesmo estilo das outras listas */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
+.end-date-picker-year-list[hidden] {
+    display: none;
+}
+
+.end-date-picker-year-list::-webkit-scrollbar { width: 0.35rem; }
+.end-date-picker-year-list::-webkit-scrollbar-track { background: transparent; }
+.end-date-picker-year-list::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+}
+
+.end-date-picker-year-option {
+    padding: 0.5rem;
+    font-family: var(--calendar-title-font);
+    font-size: 1.2rem;
+    color: var(--calendar-title-color);
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+.end-date-picker-year-option:active {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+}
+
+/* Ano atualmente exibido na grade: destacado em maior e na cor de acento */
+.end-date-picker-year-option.current {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: var(--event-add-button-bg-color);
+}
+
+/* Quando o cartão está em modo de seleção de ano, esconde nav, dias da semana e grade */
+.end-date-picker-card.year-mode .end-date-picker-nav,
+.end-date-picker-card.year-mode .end-date-picker-weekdays,
+.end-date-picker-card.year-mode .end-date-picker-grid {
+    display: none;
 }
 
 /* Botões inferiores Cancelar / OK */
