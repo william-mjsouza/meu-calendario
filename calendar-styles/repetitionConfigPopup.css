@@ -1,0 +1,259 @@
+@import url('variables.css');
+
+.repetition-config-popup {
+    position: absolute; /* Posicionado em relação ao .calendar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 15; /* Acima do pop-up de salvar evento */
+}
+
+.repetition-config-popup[hidden] {
+    display: none; /* Permite ocultar usando o atributo hidden */
+}
+
+.repetition-config-popup.active {
+    display: flex;
+}
+
+.repetition-config-form {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1.5%;
+    width: 100%;
+    height: 100%;
+    padding: 5% 5% 2% 5%;
+    background-color: var(--days-bg-color);
+    overflow-y: auto;   /* Rolagem vertical quando o conteúdo não cabe */
+    overflow-x: hidden; /* Nunca rola lateralmente */
+}
+
+/* Botão "Descartar" no topo (limpa as configurações para o padrão) */
+.discard-repetition-button {
+    width: 100%;
+    padding: 3%;
+    font-family: var(--calendar-title-font);
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: var(--event-add-button-bg-color);
+    background-color: transparent;
+    border: 1px solid var(--matrix-border-color);
+    border-radius: 999px; /* Pílula */
+    cursor: pointer;
+}
+
+.discard-repetition-button:active {
+    background-color: var(--days-clicked-bg-color);
+}
+
+/* Cada grupo "Tipo", "Quando", "Repetição", "Término" */
+.repetition-config-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 2% 0;
+    min-width: 0; /* Permite encolher para evitar overflow horizontal em grid */
+}
+
+.repetition-config-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--calendar-title-font);
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: var(--days-of-week-color);
+}
+
+.repetition-config-label i {
+    font-size: 1rem;
+}
+
+/* Texto do dia da semana (parte do grupo "Quando") */
+.repetition-when-weekday {
+    padding: 3% 4%;
+    font-family: var(--calendar-title-font);
+    font-size: 1.1rem;
+    color: var(--calendar-title-color);
+    background-color: var(--days-bg-color);
+    border: 1px solid var(--matrix-border-color);
+    border-radius: 999px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Caixa com ícone + data (usada em "Quando" e "Término") */
+.repetition-when-date, .repetition-end {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 3% 4%;
+    font-family: var(--calendar-title-font);
+    font-size: 1.1rem;
+    color: var(--calendar-title-color);
+    background-color: var(--days-bg-color);
+    border: 1px solid var(--matrix-border-color);
+    border-radius: 999px;
+    cursor: pointer;
+    overflow: hidden;
+    min-width: 0;
+}
+
+.repetition-when-date-text, .repetition-end-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.repetition-when-date i, .repetition-end i {
+    flex: 0 0 auto;
+    font-size: 1.1rem;
+}
+
+/* Dropdown de frequência */
+.repetition-config-select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    padding: 3% 4%;
+    font-family: var(--calendar-title-font);
+    font-size: 1.1rem;
+    color: var(--calendar-title-color);
+    background-color: var(--days-bg-color);
+    border: none;
+    border-bottom: 1px solid var(--matrix-border-color);
+    cursor: pointer;
+    outline: none;
+}
+
+.repetition-config-select option {
+    color: var(--calendar-title-color);
+    background-color: var(--days-bg-color);
+}
+
+/* Input nativo de data: escondido visualmente, mas ainda disparável via .click()/.showPicker() */
+.repetition-end-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Botões inferiores "Cancelar" e "Pronto" */
+.repetition-config-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8%;
+    margin-top: auto; /* Empurra para a base do formulário */
+    padding: 3% 2%;
+}
+
+.cancel-repetition-button, .confirm-repetition-button {
+    font-family: var(--calendar-title-font);
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--event-add-button-bg-color);
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.cancel-repetition-button:active, .confirm-repetition-button:active {
+    opacity: 0.6;
+}
+
+/* Layout horizontal (paisagem em celulares e telas de computador):
+   mantém ocupando a tela toda mas organiza os grupos lado a lado para usar melhor o espaço */
+@media (min-aspect-ratio: 1/1) {
+    
+
+    .discard-repetition-button {
+        grid-area: discard;
+        padding: 1.2%;
+        font-size: 1.05rem;
+    }
+    .repetition-config-group:nth-of-type(1) { grid-area: when; }      /* "Quando" */
+    .repetition-config-group:nth-of-type(2) { grid-area: frequency; } /* "Repetição" */
+    .repetition-config-group:nth-of-type(3) { grid-area: end; }       /* "Término" */
+    .repetition-config-actions {
+        grid-area: actions;
+        padding: 1% 0;
+    }
+
+    .repetition-config-group {
+        padding: 0.5% 0;
+    }
+
+    .repetition-when-weekday, .repetition-when-date, .repetition-end, .repetition-config-select {
+        padding: 1.4% 2.5%;
+        font-size: 1rem;
+    }
+}
+
+/* Telas largas (computadores em paisagem): tipografia e espaçamento um pouco maiores */
+@media (min-width: 900px) and (min-aspect-ratio: 1/1) {
+    .repetition-config-form {
+        padding: 2% 6%;
+        column-gap: 4%;
+        row-gap: 1.2%;
+    }
+
+    .discard-repetition-button {
+        padding: 0.9%;
+        font-size: 1.1rem;
+    }
+
+    .repetition-config-label {
+        font-size: 1rem;
+    }
+
+    .repetition-when-weekday, .repetition-when-date, .repetition-end, .repetition-config-select {
+        padding: 1% 2%;
+        font-size: 1.05rem;
+    }
+
+    .cancel-repetition-button, .confirm-repetition-button {
+        font-size: 1.05rem;
+    }
+}
+
+/* Telas muito baixas (paisagem em celular): comprime para evitar rolagem */
+@media (max-height: 480px) and (min-aspect-ratio: 1/1) {
+    .repetition-config-form {
+        gap: 0.5%;
+        padding: 1.5% 3%;
+        row-gap: 0.5%;
+    }
+
+    .discard-repetition-button {
+        padding: 0.6%;
+        font-size: 0.95rem;
+    }
+
+    .repetition-config-group {
+        padding: 0.3% 0;
+        gap: 0.2rem;
+    }
+
+    .repetition-config-label {
+        font-size: 0.85rem;
+    }
+
+    .repetition-when-weekday, .repetition-when-date, .repetition-end, .repetition-config-select {
+        padding: 1% 2.5%;
+        font-size: 0.9rem;
+    }
+
+    .repetition-config-actions {
+        padding: 0.4% 0;
+    }
+
+    .cancel-repetition-button, .confirm-repetition-button {
+        font-size: 0.95rem;
+    }
+}
