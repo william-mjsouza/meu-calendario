@@ -114,12 +114,24 @@
     font-size: 1.1rem;
 }
 
-/* Dropdown de frequência */
-.repetition-config-select {
-    appearance: none;
-    -webkit-appearance: none;
+/* Dropdown customizado de frequência — substitui o <select> nativo para respeitar
+   estritamente a largura do container em todas as telas */
+.custom-select {
+    position: relative;
     width: 100%;
-    padding: 3% 4%;
+    min-width: 0;
+}
+
+.custom-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 1% 2%;
     font-family: var(--calendar-title-font);
     font-size: 1.1rem;
     color: var(--calendar-title-color);
@@ -128,11 +140,75 @@
     border-bottom: 1px solid var(--matrix-border-color);
     cursor: pointer;
     outline: none;
+    text-align: left;
 }
 
-.repetition-config-select option {
+.custom-select-value {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.custom-select-trigger i {
+    flex: 0 0 auto;
+    font-size: 1.5rem;
+    transition: transform 0.15s ease;
+}
+
+.custom-select.open .custom-select-trigger i {
+    transform: rotate(180deg);
+}
+
+.custom-select-options {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    list-style: none;
+    margin: 0.25rem 0 0 0;
+    padding: 0.25rem 0;
+    max-height: 15rem;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: #2b2b2b;
+    border: 1px solid var(--matrix-border-color);
+    border-radius: 0.35rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.4);
+    /* Barra de rolagem fina no mesmo estilo das outras listas */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
+.custom-select-options[hidden] { display: none; }
+.custom-select-options::-webkit-scrollbar { width: 0.35rem; }
+.custom-select-options::-webkit-scrollbar-track { background: transparent; }
+.custom-select-options::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+}
+
+.custom-select-options li {
+    padding: 0.65rem 1rem;
+    font-family: var(--calendar-title-font);
+    font-size: 1rem;
     color: var(--calendar-title-color);
-    background-color: var(--days-bg-color);
+    cursor: pointer;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.custom-select-options li:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.custom-select-options li.selected {
+    background-color: var(--event-add-button-bg-color);
+    color: var(--days-bg-color);
+    font-weight: bold;
 }
 
 /* Input nativo de data: escondido visualmente, mas ainda disparável via .click()/.showPicker() */

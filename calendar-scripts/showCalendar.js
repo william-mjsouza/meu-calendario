@@ -28,6 +28,9 @@ export const calendarState = {
             title: "Exemplo de Evento",
             description: "Descrição do evento",
             start_date: new Date(2024, 10, 15),  // 15 de novembro de 2024
+            start_hour: "00:00",                 // "O dia todo" por padrão
+            end_hour: "23:59",
+            all_day: true,
             frequency: "biweekly",
             end_date: new Date(2025, 0, 30),     // 30 de janeiro de 2025
             color: "var(--green-marker-bg-color)"
@@ -36,6 +39,9 @@ export const calendarState = {
             title: "Exemplo de Evento",
             description: "Descrição do evento",
             start_date: new Date(2025, 6, 29),   // 29 de julho de 2025
+            start_hour: "00:00",
+            end_hour: "23:59",
+            all_day: true,
             frequency: "daily",
             end_date: new Date(2025, 11, 30),    // 30 de dezembro de 2025
             color: "var(--green-marker-bg-color)"

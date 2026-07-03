@@ -104,6 +104,7 @@ input, textarea {
 }
 
 .save-event-popup-status {
+    border: 1px solid #ececec;
     color: #8b8989;;
 }
 
@@ -133,8 +134,8 @@ input, textarea {
 
 .save-event-form textarea {
     flex: 1;
-    font-size: 1.5rem;
-    color: var(--calendar-title-color);
+    font-size: 1.2rem;
+    color: #c9c7c7;
     width: 98%;
     height: 100%;
     margin-top: 1%;

@@ -102,16 +102,39 @@
     border-left: 0.35rem solid var(--event-day-marker-bg-color); /* Cor padrão sobrescrita via inline style com a cor real do evento */
 }
 
-.event-title {
+/* Wrapper que empilha o título e a linha de horário verticalmente */
+.saved-event-info {
     flex: 1 1 0;
-    min-width: 0; /* Necessário para que o ellipsis funcione em flex */
-    padding-left: 0.75rem;
+    min-width: 0; /* Necessário para que o ellipsis dos filhos funcione */
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.event-title {
     font-family: var(--calendar-title-font);
     font-size: 1.05rem;
     color: #d6d5d5;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* Linha "🕐 HH:MM - HH:MM" abaixo do título; ausente quando o evento é "O dia todo" */
+.saved-event-time {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-family: var(--calendar-title-font);
+    font-size: 0.85rem;
+    color: #8b8989;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.saved-event-time i {
+    font-size: 0.95rem;
 }
 
 .delete-event, .conclude-event {
@@ -133,6 +156,10 @@
 .saved-event.concluded .event-title {
     text-decoration: line-through;
     text-decoration-thickness: 0.12rem;
+    opacity: 0.55;
+}
+
+.saved-event.concluded .saved-event-time {
     opacity: 0.55;
 }
 
@@ -185,7 +212,6 @@
 
     .event-title {
         font-size: 1.15rem;
-        padding-left: 1rem;
     }
 }
 
@@ -210,7 +236,6 @@
 
     .event-title {
         font-size: 1.25rem;
-        padding-left: 1.1rem;
     }
 
     .delete-event, .conclude-event {

@@ -1,0 +1,154 @@
+@import url('variables.css');
+
+/* Pop-up para escolher data/hora de início e fim do evento
+   Overlay centralizado com backdrop translúcido no mesmo padrão dos outros pop-ups */
+
+.datetime-picker-popup {
+    position: absolute; /* Posicionado em relação ao .calendar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 18; /* Acima do save-event-popup */
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.datetime-picker-popup[hidden] {
+    display: none;
+}
+
+.datetime-picker-popup.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.datetime-picker-card {
+    display: flex;
+    flex-direction: column;
+    width: min(92%, 26rem);
+    max-height: 90%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem 1rem 0.5rem 1rem;
+    background-color: #2b2b2b;
+    color: var(--calendar-title-color);
+    font-family: var(--calendar-title-font);
+}
+
+/* Linha "O dia todo" com ícone + label + checkbox */
+.datetime-picker-allday {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0.5rem;
+    font-size: 1.05rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.datetime-picker-allday i {
+    font-size: 1.35rem;
+    color: var(--calendar-title-color);
+}
+
+.datetime-picker-allday span {
+    flex: 1;
+}
+
+.datetime-picker-allday-check {
+    width: 1.15rem;
+    height: 1.15rem;
+    accent-color: var(--event-add-button-bg-color);
+    cursor: pointer;
+}
+
+.datetime-picker-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0.25rem 0;
+}
+
+/* Linhas de início/fim: data à esquerda, hora à direita */
+.datetime-picker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0.5rem;
+}
+
+.datetime-picker-row button {
+    flex: 0 0 auto;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--calendar-title-font);
+    font-size: 1.05rem;
+    color: var(--calendar-title-color);
+    background-color: transparent;
+    border: none;
+    border-radius: 0.35rem;
+    cursor: pointer;
+}
+
+.datetime-picker-row button:active,
+.datetime-picker-row button:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.datetime-picker-start-date, .datetime-picker-end-date {
+    flex: 1 1 0 !important;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Estado "O dia todo" ativo: esconde as horas mas mantém as datas */
+.datetime-picker-card.all-day .datetime-picker-start-time,
+.datetime-picker-card.all-day .datetime-picker-end-time {
+    display: none;
+}
+
+.datetime-picker-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    padding: 0.75rem 0.5rem 0.5rem 0.5rem;
+}
+
+.datetime-picker-cancel, .datetime-picker-ok {
+    font-family: var(--calendar-title-font);
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--event-add-button-bg-color);
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.datetime-picker-cancel:active, .datetime-picker-ok:active {
+    opacity: 0.6;
+}
+
+/* Trigger no formulário de salvar: ícone + texto */
+.save-event-popup-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.6rem;
+    font-family: var(--calendar-title-font);
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #8b8989;
+    background-color: transparent;
+    cursor: pointer;
+    border-radius: 0.25rem;
+}
+
+.save-event-popup-status:active {
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.save-event-popup-status i {
+    font-size: 1.1rem;
+}
