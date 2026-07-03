@@ -7,6 +7,9 @@ import { openColorPickerPopup, colorPickerButton, saveEventFormGroup1 } from './
 // Importa as funções e o estado relacionados à configuração de repetição
 import { openRepetitionConfigPopup, repetitionState, resetRepetitionState, getFrequencyLabel } from './configureRepetition.js';
 
+// Importa o pop-up de escolha de data/hora do evento
+import { openDateTimePicker, isSameDay } from './dateTimePicker.js';
+
 // Importa o objeto que contém o estado atual do calendário
 import { calendarState } from './showCalendar.js'
 
@@ -23,9 +26,19 @@ const eventDescription = document.querySelector('#event-description');
 const dateTime = document.querySelectorAll('.event-date-time p');
 const eventDateTime = document.querySelector('.event-date-time');
 const recurrenceIcon = document.querySelector('.event-date-time .recurrence-icon');
+const timeTrigger = document.querySelector('.save-event-popup-status');
+const timeLabel = document.querySelector('.save-event-time-label');
 
 // Referência ao evento que está sendo editado (null = criação de um novo evento)
 let editingEvent = null;
+
+// Estado tentativo do datetime do evento sendo criado/editado
+// (dias e horas escolhidos no pop-up de data/hora; commit no saveEvent())
+let pendingStartDate = null;
+let pendingEndDate = null;
+let pendingStartTime = "00:00";
+let pendingEndTime = "23:59";
+let pendingAllDay = true; // Por padrão o evento ocupa o dia todo
 
 // Função para lidar com o envio do formulário
 function handleSaveEventSubmit(event) {
@@ -77,6 +90,50 @@ function closeSaveEventPopup() {
     // Remove o escutador de evento
     colorPickerButton.removeEventListener('click', openColorPickerPopup);
     eventDateTime.removeEventListener('click', handleDateTimeClick);
+    timeTrigger.removeEventListener('click', handleTimeTriggerClick);
+}
+
+// Formata uma data como DD/MM/AA (2 dígitos no ano) — usado quando o fim é em outro dia
+function formatShortDate(date) {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yy = String(date.getFullYear() % 100).padStart(2, '0');
+    return `${dd}/${mm}/${yy}`;
+}
+
+// Atualiza o rótulo do trigger de horário com base no estado pendente
+// - "O dia todo" quando o evento ocupa 00:00–23:59
+// - "HH:MM - HH:MM" quando início e fim são no mesmo dia
+// - "HH:MM - HH:MM DD/MM/AA" quando o fim está em dia diferente do início
+function updateTimeLabel() {
+    if (pendingAllDay) {
+        timeLabel.textContent = "O dia todo";
+        return;
+    }
+    const sameDay = isSameDay(pendingStartDate, pendingEndDate);
+    if (sameDay) {
+        timeLabel.textContent = `${pendingStartTime} - ${pendingEndTime}`;
+    } else {
+        timeLabel.textContent = `${pendingStartTime} - ${pendingEndTime} ${formatShortDate(pendingEndDate)}`;
+    }
+}
+
+// Handler do clique no ícone de relógio: abre o pop-up de data/hora do evento
+function handleTimeTriggerClick() {
+    openDateTimePicker({
+        startDate: pendingStartDate,
+        endDate: pendingEndDate,
+        startTime: pendingStartTime,
+        endTime: pendingEndTime,
+        allDay: pendingAllDay
+    }, (result) => {
+        pendingStartDate = result.startDate;
+        pendingEndDate = result.endDate;
+        pendingStartTime = result.startTime;
+        pendingEndTime = result.endTime;
+        pendingAllDay = result.allDay;
+        updateTimeLabel();
+    });
 }
 
 // Função para tratar o clique na caixa de data/frequência: abre o pop-up de repetição
@@ -99,13 +156,26 @@ function saveEvent() {
     // Adiciona o marcador de evento no dia
     //calendarState.selectedDayElement.classList.add('marked-day');
 
+    // Determina a frequência e o término da repetição
+    // Se o evento se estende por múltiplos dias, força repetição diária cobrindo todos esses dias
+    let effectiveFrequency = repetitionState.frequency;
+    let effectiveRecurrenceEnd = repetitionState.end_date;
+    if (!isSameDay(pendingStartDate, pendingEndDate)) {
+        effectiveFrequency = "daily";
+        effectiveRecurrenceEnd = new Date(pendingEndDate);
+    }
+
     // Coleta os dados atualizados a partir do formulário
     const eventData = {
         title: eventName.value,
         description: eventDescription.value,
-        start_date: new Date(calendarState.year, calendarState.month - 1, calendarState.day), // Mês 0-indexado no Date
-        frequency: repetitionState.frequency,
-        end_date: repetitionState.end_date,
+        start_date: new Date(pendingStartDate), // Data de início escolhida no pop-up de data/hora
+        end_event_date: new Date(pendingEndDate), // Data em que o evento termina (pode ser >= start_date)
+        start_hour: pendingStartTime, // "HH:MM" do início
+        end_hour: pendingEndTime,     // "HH:MM" do fim
+        all_day: pendingAllDay,
+        frequency: effectiveFrequency,
+        end_date: effectiveRecurrenceEnd, // Término da recorrência
         // Lê via getComputedStyle para garantir que a cor já venha resolvida em RGB,
         // mesmo quando o botão ainda está com a cor padrão definida via var(--...) no CSS
         color: getComputedStyle(colorPickerButton).backgroundColor,
@@ -147,6 +217,12 @@ export function openSaveEventPopup(eventToEdit) {
         // Reflete a configuração de repetição do evento no estado temporário
         repetitionState.frequency = eventToEdit.frequency;
         repetitionState.end_date = eventToEdit.end_date;
+        // Reflete o datetime do evento (com fallbacks para eventos antigos sem esses campos)
+        pendingStartDate = eventToEdit.start_date ? new Date(eventToEdit.start_date) : new Date(calendarState.year, calendarState.month - 1, calendarState.day);
+        pendingEndDate = eventToEdit.end_event_date ? new Date(eventToEdit.end_event_date) : new Date(pendingStartDate);
+        pendingStartTime = eventToEdit.start_hour || "00:00";
+        pendingEndTime = eventToEdit.end_hour || "23:59";
+        pendingAllDay = eventToEdit.all_day !== undefined ? eventToEdit.all_day : true;
     } else {
         // Modo criação: limpa todos os campos e reseta o estado de repetição
         editingEvent = null;
@@ -155,6 +231,12 @@ export function openSaveEventPopup(eventToEdit) {
         colorPickerButton.style.backgroundColor = '';      // Volta à cor padrão definida no CSS
         saveEventFormGroup1.style.backgroundColor = '';    // Volta à cor padrão definida no CSS
         resetRepetitionState();
+        // Estado de data/hora inicial: o dia clicado, o dia todo
+        pendingStartDate = new Date(calendarState.year, calendarState.month - 1, calendarState.day);
+        pendingEndDate = new Date(pendingStartDate);
+        pendingStartTime = "00:00";
+        pendingEndTime = "23:59";
+        pendingAllDay = true;
     }
 
     // Restaura o placeholder do título caso tenha sido trocado pela mensagem de validação
@@ -166,6 +248,7 @@ export function openSaveEventPopup(eventToEdit) {
     // Atualiza a data e o ícone de recorrência do evento
     dateTime[0].textContent = formatDate(`${calendarState.day}/${calendarState.month}/${calendarState.year}`);
     updateFrequencyLabel(); // Mostra/oculta o ícone de recorrência conforme a frequência atual
+    updateTimeLabel();      // Reflete "O dia todo" ou o intervalo de horário atual no trigger
 
     // Adiciona o evento de clique no botão de selecionar cor para abrir o pop-up de selecionar a cor do evento
     colorPickerButton.addEventListener('click', openColorPickerPopup);
@@ -173,6 +256,9 @@ export function openSaveEventPopup(eventToEdit) {
     // Adiciona o evento de clique na caixa de data/frequência para abrir o pop-up de configuração de repetição
     // Ao fechar o pop-up, sincroniza o rótulo da frequência com o que foi escolhido
     eventDateTime.addEventListener('click', handleDateTimeClick);
+
+    // Clique no ícone de relógio + rótulo abre o pop-up de escolha de data/hora do evento
+    timeTrigger.addEventListener('click', handleTimeTriggerClick);
 
     // Adiciona um escutador de evento de submissão no próprio formulário para tratar o envio dele
     saveEventForm.addEventListener("submit", handleSaveEventSubmit);

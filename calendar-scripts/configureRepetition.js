@@ -38,7 +38,34 @@ const repetitionPopup = document.querySelector('.repetition-config-popup');
 const repetitionForm = document.querySelector('.repetition-config-form');
 const repetitionWhenWeekday = document.querySelector('.repetition-when-weekday');
 const repetitionWhenDateText = document.querySelector('.repetition-when-date-text');
-const repetitionFrequency = document.querySelector('#repetition-frequency');
+// Wrapper do dropdown customizado que substitui o <select> nativo
+const repetitionFrequencyWrapper = document.querySelector('#repetition-frequency');
+const repetitionFrequencyTrigger = repetitionFrequencyWrapper.querySelector('.custom-select-trigger');
+const repetitionFrequencyValueEl = repetitionFrequencyWrapper.querySelector('.custom-select-value');
+const repetitionFrequencyOptionsList = repetitionFrequencyWrapper.querySelector('.custom-select-options');
+const repetitionFrequencyOptions = repetitionFrequencyWrapper.querySelectorAll('.custom-select-options li');
+// Objeto-façade com API .value (get/set) para o resto do código continuar operando como se
+// ainda fosse um <select> nativo
+const repetitionFrequency = {
+    get value() {
+        return repetitionFrequencyWrapper.dataset.value || "once";
+    },
+    set value(newValue) {
+        repetitionFrequencyWrapper.dataset.value = newValue;
+        repetitionFrequencyValueEl.textContent = frequencyLabels[newValue] || frequencyLabels["once"];
+        repetitionFrequencyOptions.forEach(opt => {
+            opt.classList.toggle('selected', opt.dataset.value === newValue);
+        });
+    },
+    addEventListener(event, handler) {
+        // Compatibilidade: repassa 'change' para um evento custom disparado quando o valor muda
+        repetitionFrequencyWrapper.addEventListener(event, handler);
+    },
+    removeEventListener(event, handler) {
+        repetitionFrequencyWrapper.removeEventListener(event, handler);
+    }
+};
+
 const repetitionEnd = document.querySelector('.repetition-end');
 const repetitionEndText = document.querySelector('.repetition-end-text');
 const discardButton = document.querySelector('.discard-repetition-button');
@@ -146,6 +173,43 @@ function discardRepetitionFields() {
 // Callback opcional executado ao fechar o pop-up (definido em openRepetitionConfigPopup)
 let onCloseCallback = null;
 
+// ---- Comportamento do dropdown customizado ----
+
+function openFrequencyDropdown() {
+    repetitionFrequencyWrapper.classList.add('open');
+    repetitionFrequencyOptionsList.hidden = false;
+}
+
+function closeFrequencyDropdown() {
+    repetitionFrequencyWrapper.classList.remove('open');
+    repetitionFrequencyOptionsList.hidden = true;
+}
+
+function toggleFrequencyDropdown(event) {
+    event.stopPropagation();
+    if (repetitionFrequencyOptionsList.hidden) {
+        openFrequencyDropdown();
+    } else {
+        closeFrequencyDropdown();
+    }
+}
+
+function handleFrequencyOptionClick(event) {
+    const li = event.target.closest('li[data-value]');
+    if (!li) return;
+    event.stopPropagation();
+    repetitionFrequency.value = li.dataset.value;
+    closeFrequencyDropdown();
+    // Dispara um 'change' para os listeners registrados (ex.: updateRelativeTimeLabel)
+    repetitionFrequencyWrapper.dispatchEvent(new Event('change'));
+}
+
+function handleOutsideFrequencyClick(event) {
+    if (!repetitionFrequencyWrapper.contains(event.target)) {
+        closeFrequencyDropdown();
+    }
+}
+
 // Função para fechar o pop-up de configuração de repetição
 function closeRepetitionConfigPopup() {
     // Esconde o pop-up
@@ -157,6 +221,12 @@ function closeRepetitionConfigPopup() {
     cancelButton.removeEventListener('click', closeRepetitionConfigPopup);
     repetitionEnd.removeEventListener('click', handleEndDateClick);
     repetitionFrequency.removeEventListener('change', updateRelativeTimeLabel);
+
+    // Escutadores do dropdown customizado
+    repetitionFrequencyTrigger.removeEventListener('click', toggleFrequencyDropdown);
+    repetitionFrequencyOptionsList.removeEventListener('click', handleFrequencyOptionClick);
+    document.removeEventListener('click', handleOutsideFrequencyClick);
+    closeFrequencyDropdown();
 
     // Dispara o callback de fechamento, se houver
     if (typeof onCloseCallback === 'function') {
@@ -195,11 +265,8 @@ export function openRepetitionConfigPopup(onClose) {
     repetitionWhenDateText.textContent = `${fullDayOfWeekNames[dayOfWeek]}, ${calendarState.day} de ${getMonthName(calendarState.month).toLowerCase()} de ${calendarState.year}`;
     // A pílula da esquerda do "Quando" agora mostra o tempo relativo (preenchida em updateRelativeTimeLabel)
 
-    // Atualiza dinamicamente o texto das opções "Mensalmente" e "Anualmente" com o dia/mês selecionado
-    const monthlyOption = repetitionFrequency.querySelector('option[value="monthly"]');
-    const yearlyOption = repetitionFrequency.querySelector('option[value="yearly"]');
-    monthlyOption.textContent = `Mensalmente (dia ${calendarState.day})`;
-    yearlyOption.textContent = `Anualmente (${calendarState.day} de ${getMonthName(calendarState.month).toLowerCase()})`;
+    // (As opções do dropdown customizado têm textos curtos fixos no HTML — o dia/mês exato
+    // já aparece na pílula "Quando" acima, então não precisamos alterá-los dinamicamente.)
 
     // Reflete o estado atual nos campos do formulário
     repetitionFrequency.value = repetitionState.frequency;
@@ -216,4 +283,9 @@ export function openRepetitionConfigPopup(onClose) {
     cancelButton.addEventListener('click', closeRepetitionConfigPopup);
     repetitionEnd.addEventListener('click', handleEndDateClick);
     repetitionFrequency.addEventListener('change', updateRelativeTimeLabel);
+
+    // Escutadores do dropdown customizado
+    repetitionFrequencyTrigger.addEventListener('click', toggleFrequencyDropdown);
+    repetitionFrequencyOptionsList.addEventListener('click', handleFrequencyOptionClick);
+    document.addEventListener('click', handleOutsideFrequencyClick);
 }

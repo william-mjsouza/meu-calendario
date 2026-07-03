@@ -1,0 +1,178 @@
+@import url('variables.css');
+
+/* Pop-up de seleção de horário estilo relógio (padrão Android) */
+
+.clock-picker-popup {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 25; /* Acima do datetime-picker */
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.clock-picker-popup[hidden] {
+    display: none;
+}
+
+.clock-picker-popup.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.clock-picker-card {
+    display: flex;
+    flex-direction: column;
+    width: min(90%, 22rem);
+    background-color: var(--days-bg-color);
+    color: var(--calendar-title-color);
+    font-family: var(--calendar-title-font);
+}
+
+/* Display digital HH : MM no topo */
+.clock-picker-display {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    padding: 1.5rem 1rem;
+    font-size: 3.5rem;
+    font-weight: bold;
+    background-color: #646464;
+}
+
+.clock-picker-hour-btn, .clock-picker-minute-btn {
+    font-family: var(--calendar-title-font);
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: var(--calendar-title-color);
+    background-color: transparent;
+    padding: 0 0.5rem;
+    cursor: pointer;
+    opacity: 0.5;
+}
+
+.clock-picker-hour-btn.active, .clock-picker-minute-btn.active {
+    opacity: 1;
+}
+
+/* Mostrador circular — captura eventos de ponteiro para permitir drag do ponteiro */
+.clock-picker-dial {
+    position: relative;
+    width: 18rem;
+    height: 18rem;
+    max-width: 90vw;
+    max-height: 90vw;
+    margin: 1rem auto;
+    border-radius: 50%;
+    background-color: #4a4a4a;
+    touch-action: none; /* Impede scroll/zoom do navegador ao arrastar */
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Ponteiro que sai do centro em direção ao valor selecionado
+   Corrigido: a base fica no centro do mostrador e o ponteiro se estende para CIMA
+   Assim rotate(0deg) aponta para 12/00 no topo. */
+.clock-picker-hand {
+    position: absolute;
+    bottom: 50%;
+    left: 50%;
+    width: 2px;
+    background-color: var(--event-add-button-bg-color);
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(0deg);
+    pointer-events: none;
+    z-index: 1;
+    /* Altura padrão: alcança o anel externo (números maiores) */
+    height: 42%;
+}
+
+/* Quando o valor selecionado está no anel interno (13-23, 00), o ponteiro é mais curto */
+.clock-picker-hand.inner {
+    height: 28%;
+}
+
+/* Bolinha na ponta do ponteiro, sobre a qual o número selecionado se destaca */
+.clock-picker-hand-tip {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1.8rem;
+    height: 1.8rem;
+    background-color: var(--event-add-button-bg-color);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+/* Bolinha central (pivô do ponteiro) */
+.clock-picker-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0.5rem;
+    height: 0.5rem;
+    background-color: var(--event-add-button-bg-color);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* Números do mostrador (apenas visuais; a interação acontece via pointer events no dial) */
+.clock-number {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    font-family: var(--calendar-title-font);
+    font-size: 1.1rem;
+    color: var(--calendar-title-color);
+    background-color: transparent;
+    border-radius: 50%;
+    z-index: 3;
+    user-select: none;
+    pointer-events: none; /* Os cliques passam para o dial fazer o cálculo por ângulo */
+}
+
+/* Números do anel interno (13-23, 00) são menores e mais claros */
+.clock-number.inner {
+    font-size: 0.9rem;
+    opacity: 0.75;
+}
+
+/* Número selecionado: destacado como círculo teal */
+.clock-number.selected {
+    background-color: var(--event-add-button-bg-color);
+    color: var(--days-bg-color);
+    font-weight: bold;
+    opacity: 1;
+    z-index: 4;
+}
+
+/* Botões inferiores */
+.clock-picker-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1.5rem;
+    padding: 0.5rem 1.25rem 1rem 1.25rem;
+}
+
+.clock-picker-cancel, .clock-picker-ok {
+    font-family: var(--calendar-title-font);
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--event-add-button-bg-color);
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.clock-picker-cancel:active, .clock-picker-ok:active {
+    opacity: 0.6;
+}

@@ -10,6 +10,34 @@ const createEventButton = document.querySelector('.create-event-button');
 const savedEventsContainer = document.querySelector('.saved-events');
 const overlay = document.createElement('div');
 
+// Verifica se duas datas caem no mesmo dia (ignorando horas)
+function isSameDay(a, b) {
+    return a.getFullYear() === b.getFullYear() &&
+           a.getMonth() === b.getMonth() &&
+           a.getDate() === b.getDate();
+}
+
+// Formata uma data como DD/MM/AA (2 dígitos no ano)
+function formatShortDate(date) {
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yy = String(date.getFullYear() % 100).padStart(2, '0');
+    return `${dd}/${mm}/${yy}`;
+}
+
+// Retorna a string de horário do evento para exibir na lista ("HH:MM - HH:MM" ou "... DD/MM/AA"
+// se o fim é em dia diferente); retorna null quando o evento é "O dia todo"
+function getEventTimeLabel(event) {
+    if (event.all_day) return null;
+    if (!event.start_hour || !event.end_hour) return null;
+    const startDate = event.start_date ? new Date(event.start_date) : null;
+    const endDate = event.end_event_date ? new Date(event.end_event_date) : startDate;
+    if (startDate && endDate && !isSameDay(startDate, endDate)) {
+        return `${event.start_hour} - ${event.end_hour} ${formatShortDate(endDate)}`;
+    }
+    return `${event.start_hour} - ${event.end_hour}`;
+}
+
 // Resolve uma string de cor (que pode conter var(--...)) para um valor concreto que possa
 // ser aplicado a propriedades CSS via JS (ex.: border-left-color)
 // Consulta a variável CSS diretamente em :root, evitando problemas de resolução tardia
@@ -64,10 +92,31 @@ function renderSavedEvents() {
             openSaveEventPopup(event);
         });
 
+        // Bloco de informações (título + linha de horário) em coluna
+        const info = document.createElement('div');
+        info.classList.add('saved-event-info');
+
         // Título do evento
         const title = document.createElement('h3');
         title.classList.add('event-title');
         title.textContent = event.title;
+        info.appendChild(title);
+
+        // Linha de horário: relógio + "HH:MM - HH:MM [DD/MM/AA]", omitida quando é "O dia todo"
+        const timeLabel = getEventTimeLabel(event);
+        if (timeLabel) {
+            const timeRow = document.createElement('span');
+            timeRow.classList.add('saved-event-time');
+            const clockIcon = document.createElement('i');
+            clockIcon.classList.add('material-icons');
+            clockIcon.setAttribute('aria-hidden', 'true');
+            clockIcon.textContent = 'access_time';
+            const timeText = document.createElement('span');
+            timeText.textContent = timeLabel;
+            timeRow.appendChild(clockIcon);
+            timeRow.appendChild(timeText);
+            info.appendChild(timeRow);
+        }
 
         // Botão de excluir
         const deleteButton = document.createElement('button');
@@ -81,7 +130,7 @@ function renderSavedEvents() {
         concludeButton.textContent = 'check';
         concludeButton.addEventListener('click', () => handleConcludeEvent(event, savedEvent));
 
-        savedEvent.appendChild(title);
+        savedEvent.appendChild(info);
         savedEvent.appendChild(deleteButton);
         savedEvent.appendChild(concludeButton);
         savedEventsContainer.appendChild(savedEvent);

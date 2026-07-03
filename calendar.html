@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="calendar-styles/saveEventPopup.css">
     <link rel="stylesheet" href="calendar-styles/repetitionConfigPopup.css">
     <link rel="stylesheet" href="calendar-styles/endDatePicker.css">
+    <link rel="stylesheet" href="calendar-styles/dateTimePickerPopup.css">
+    <link rel="stylesheet" href="calendar-styles/clockPicker.css">
 </head>
 <body>
     <main>
@@ -124,7 +126,11 @@
                     </div>
                     <!-- Seção de data e hora do evento -->
                     <div class="save-event-form-group2">
-                        <span class="save-event-popup-status">Editando</span>
+                        <!-- Trigger: ícone de relógio + rótulo do horário; abre o pop-up de escolha de data/hora -->
+                        <button type="button" class="save-event-popup-status">
+                            <i class="material-icons" aria-hidden="true">access_time</i>
+                            <span class="save-event-time-label">O dia todo</span>
+                        </button>
                         <span class="event-date-time">
                             <i class="material-icons" aria-hidden="true">event</i> <!-- Ícone de calendário -->
                             <p aria-label="Data do Evento">??/??/20???</p> <!-- Data do dia clicado -->
@@ -168,15 +174,23 @@
                     </div>
                     <!-- Grupo "Repetição": frequência com que o evento se repete -->
                     <div class="repetition-config-group">
-                        <label class="repetition-config-label" for="repetition-frequency">Repetição <i class="material-icons" aria-hidden="true">sync_alt</i></label>
-                        <select id="repetition-frequency" class="repetition-config-select">
-                            <option value="once">Uma só vez</option>
-                            <option value="daily">Diariamente</option>
-                            <option value="weekly">Semanalmente</option>
-                            <option value="biweekly">Quinzenalmente</option>
-                            <option value="monthly">Mensalmente</option>
-                            <option value="yearly">Anualmente</option>
-                        </select>
+                        <label class="repetition-config-label">Repetição <i class="material-icons" aria-hidden="true">sync_alt</i></label>
+                        <!-- Dropdown customizado: substitui o <select> nativo para evitar que o menu do
+                             navegador estoure a largura em telas verticais estreitas -->
+                        <div class="custom-select" id="repetition-frequency">
+                            <button type="button" class="custom-select-trigger" aria-haspopup="listbox">
+                                <span class="custom-select-value">Uma só vez</span>
+                                <i class="material-icons" aria-hidden="true">arrow_drop_down</i>
+                            </button>
+                            <ul class="custom-select-options" role="listbox" hidden>
+                                <li role="option" data-value="once">Uma só vez</li>
+                                <li role="option" data-value="daily">Diariamente</li>
+                                <li role="option" data-value="weekly">Semanalmente</li>
+                                <li role="option" data-value="biweekly">Quinzenalmente</li>
+                                <li role="option" data-value="monthly">Mensalmente</li>
+                                <li role="option" data-value="yearly">Anualmente</li>
+                            </ul>
+                        </div>
                     </div>
                     <!-- Grupo "Término": data em que a repetição deixa de ocorrer ("Nunca" por padrão) -->
                     <div class="repetition-config-group">
@@ -192,6 +206,51 @@
                         <button type="submit" class="confirm-repetition-button">Pronto</button>
                     </div>
                 </form>
+            </aside>
+            <!-- Pop-up para escolher data e hora de início e fim do evento -->
+            <aside class="datetime-picker-popup" aria-label="Escolher data e hora do evento" hidden>
+                <div class="datetime-picker-card">
+                    <!-- Linha "O dia todo" com toggle -->
+                    <label class="datetime-picker-allday">
+                        <i class="material-icons" aria-hidden="true">access_time</i>
+                        <span>O dia todo</span>
+                        <input type="checkbox" class="datetime-picker-allday-check">
+                    </label>
+                    <div class="datetime-picker-divider"></div>
+                    <!-- Linha de início: data + hora -->
+                    <div class="datetime-picker-row">
+                        <button type="button" class="datetime-picker-start-date">?</button>
+                        <button type="button" class="datetime-picker-start-time">06:00</button>
+                    </div>
+                    <!-- Linha de fim: data + hora -->
+                    <div class="datetime-picker-row">
+                        <button type="button" class="datetime-picker-end-date">?</button>
+                        <button type="button" class="datetime-picker-end-time">06:00</button>
+                    </div>
+                    <div class="datetime-picker-actions">
+                        <button type="button" class="datetime-picker-cancel">Cancelar</button>
+                        <button type="button" class="datetime-picker-ok">OK</button>
+                    </div>
+                </div>
+            </aside>
+            <!-- Pop-up de seleção de horário estilo relógio -->
+            <aside class="clock-picker-popup" aria-label="Escolher horário" hidden>
+                <div class="clock-picker-card">
+                    <div class="clock-picker-display">
+                        <button type="button" class="clock-picker-hour-btn active">06</button>
+                        <span>:</span>
+                        <button type="button" class="clock-picker-minute-btn">00</button>
+                    </div>
+                    <div class="clock-picker-dial">
+                        <div class="clock-picker-hand"></div>
+                        <div class="clock-picker-center"></div>
+                        <!-- Números da mostrador inseridos dinamicamente via JS -->
+                    </div>
+                    <div class="clock-picker-actions">
+                        <button type="button" class="clock-picker-cancel">Cancelar</button>
+                        <button type="button" class="clock-picker-ok">OK</button>
+                    </div>
+                </div>
             </aside>
             <!-- Pop-up customizado para escolher a data de término da repetição -->
             <aside class="end-date-picker-popup" aria-label="Escolher data de término" hidden>
