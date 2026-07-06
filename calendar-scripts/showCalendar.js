@@ -1,3 +1,11 @@
+// Importa o cliente da API (autenticação + eventos)
+import { isAuthenticated, listEvents, clearSession } from './api.js';
+
+// Guard de autenticação: se não houver token válido, volta para a tela de login
+if (!isAuthenticated()) {
+    window.location.href = "index.html";
+}
+
 // Importa as novas funções que criei para manipular datas
 import { getDayOfWeek, getDaysInMonth, getMonthName } from './newDateFunctions.js';
 // Importa a função de exibição do pop-up de adicionar evento no calendário
@@ -22,38 +30,15 @@ export const calendarState = {
     month: MONTH,
     day: DAY,
     selectedDayElement: null,
-    dayEvents: [
-        // Exemplos de evento (lembrando que no Date do JS o mês é 0-indexado: 0 = janeiro, ..., 11 = dezembro)
-        {
-            title: "Exemplo de Evento",
-            description: "Descrição do evento",
-            start_date: new Date(2024, 10, 15),  // 15 de novembro de 2024
-            start_hour: "00:00",                 // "O dia todo" por padrão
-            end_hour: "23:59",
-            all_day: true,
-            frequency: "biweekly",
-            end_date: new Date(2025, 0, 30),     // 30 de janeiro de 2025
-            color: "var(--green-marker-bg-color)"
-        },
-        {
-            title: "Exemplo de Evento",
-            description: "Descrição do evento",
-            start_date: new Date(2025, 6, 29),   // 29 de julho de 2025
-            start_hour: "00:00",
-            end_hour: "23:59",
-            all_day: true,
-            frequency: "daily",
-            end_date: new Date(2025, 11, 30),    // 30 de dezembro de 2025
-            color: "var(--green-marker-bg-color)"
-        },
-        // Adicione outros eventos aqui para testar
-    ]
+    // Eventos do usuário — carregados do backend em main() no startup
+    dayEvents: []
 };
 
 // Captura os botões de controle do calendário
 const previousButton = document.querySelector('.previous-month');
 const nextButton = document.querySelector('.next-month');
 const calendarTitle = document.querySelector('.calendar-title');
+const logoutButton = document.querySelector('.logout-button');
 
 // Função para lidar com o toque em um dia do mês (para smartphones e tablets)
 function handleDayTouch(event) {
@@ -258,7 +243,7 @@ function updateCalendar(newMonth, newYear) {
     showCalendar(newMonth, newYear);    // Atualiza o calendário com os novos valores de mês e ano
 }
 
-function main() {
+async function main() {
     // Evento de clique pro botão anterior
     previousButton.addEventListener('click', () => {
         if (calendarState.month === 1) {
@@ -281,6 +266,14 @@ function main() {
         updateCalendar(calendarState.month, calendarState.year); // Atualiza o calendário
     });
 
+    // Clique no botão flutuante de logout: limpa a sessão e volta para a tela de login
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            clearSession();
+            window.location.href = "index.html";
+        });
+    }
+
     // Clique no título abre o picker de data para navegar rapidamente para um mês específico
     // Usa o mesmo efeito ripple do botão "Criar" — o callback é disparado ao soltar dentro do elemento
     calendarTitle.style.cursor = 'pointer';
@@ -297,7 +290,22 @@ function main() {
 
     // Inicializa o calendário na primeira chamada com o mês e o ano atuais
     showCalendar(MONTH, YEAR);
+
+    // Carrega os eventos do usuário do backend em segundo plano
+    // Falhas de rede não bloqueiam a interface — o calendário renderiza vazio e re-renderiza quando chegar
+    try {
+        const events = await listEvents();
+        calendarState.dayEvents = events;
+        showCalendar(calendarState.month, calendarState.year);
+    } catch (err) {
+        console.error("Falha ao carregar eventos do backend:", err);
+    }
+}
+
+// Torna a main assíncrona para aguardar o carregamento dos eventos
+async function bootstrap() {
+    await main();
 }
 
 // Chama a função main ao carregar o script
-main();
+bootstrap();

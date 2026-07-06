@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Calendário — Entrar</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="calendar-styles/variables.css">
+    <link rel="stylesheet" href="calendar-styles/login.css">
+</head>
+<body>
+    <main class="login-main">
+        <section class="login-card">
+            <header class="login-header">
+                <h1 class="login-title">Meu Calendário</h1>
+                <p class="login-subtitle">Organize seus eventos, tarefas e recorrências.</p>
+            </header>
+
+            <!-- Abas Entrar / Cadastrar -->
+            <div class="login-tabs">
+                <button type="button" class="login-tab active" data-mode="login">Entrar</button>
+                <button type="button" class="login-tab" data-mode="register">Cadastrar</button>
+            </div>
+
+            <!-- Formulário de login -->
+            <form class="login-form" data-form="login" autocomplete="on">
+                <label class="login-field">
+                    <span>E-mail</span>
+                    <input type="email" name="email" required autocomplete="username" placeholder="voce@exemplo.com">
+                </label>
+                <label class="login-field">
+                    <span>Senha</span>
+                    <input type="password" name="password" required autocomplete="current-password" minlength="6" placeholder="••••••••">
+                </label>
+                <button type="submit" class="login-submit">Entrar</button>
+            </form>
+
+            <!-- Formulário de cadastro -->
+            <form class="login-form" data-form="register" hidden autocomplete="on">
+                <label class="login-field">
+                    <span>Nome</span>
+                    <input type="text" name="name" required autocomplete="name" placeholder="Como devo te chamar?">
+                </label>
+                <label class="login-field">
+                    <span>E-mail</span>
+                    <input type="email" name="email" required autocomplete="email" placeholder="voce@exemplo.com">
+                </label>
+                <label class="login-field">
+                    <span>Senha</span>
+                    <input type="password" name="password" required autocomplete="new-password" minlength="6" placeholder="Mínimo 6 caracteres">
+                </label>
+                <button type="submit" class="login-submit">Criar conta</button>
+            </form>
+
+            <!-- Mensagem de erro/sucesso -->
+            <p class="login-message" hidden></p>
+        </section>
+    </main>
+    <script type="module" src="/calendar-scripts/auth.js"></script>
+</body>
+</html>

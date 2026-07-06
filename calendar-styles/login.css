@@ -1,0 +1,171 @@
+@import url('variables.css');
+
+body {
+    min-height: 100vh;
+    background-color: var(--days-bg-color);
+    font-family: var(--calendar-title-font);
+    color: var(--calendar-title-color);
+}
+
+.login-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+}
+
+.login-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    width: min(92%, 26rem);
+    padding: 2rem 1.75rem;
+    background-color: #1a1a1a;
+    border: 1px solid var(--matrix-border-color);
+    border-radius: 0.75rem;
+    box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.4);
+}
+
+.login-header {
+    text-align: center;
+}
+
+.login-title {
+    font-size: 1.75rem;
+    font-weight: bold;
+    color: var(--calendar-title-color);
+    margin-bottom: 0.25rem;
+}
+
+.login-subtitle {
+    font-size: 0.95rem;
+    color: #8b8989;
+}
+
+/* Abas Entrar / Cadastrar */
+.login-tabs {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    background-color: #0f0f0f;
+    border-radius: 999px;
+}
+
+.login-tab {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    font-family: var(--calendar-title-font);
+    font-size: 0.95rem;
+    font-weight: bold;
+    color: #8b8989;
+    background-color: transparent;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.login-tab.active {
+    background-color: var(--event-add-button-bg-color);
+    color: var(--days-bg-color);
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.login-form[hidden] {
+    display: none;
+}
+
+.login-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.login-field span {
+    font-size: 0.85rem;
+    font-weight: bold;
+    color: var(--days-of-week-color);
+}
+
+.login-field input {
+    padding: 0.75rem 0.85rem;
+    font-family: var(--calendar-title-font);
+    font-size: 1rem;
+    color: var(--calendar-title-color);
+    background-color: #0f0f0f;
+    border: 1px solid var(--matrix-border-color);
+    border-radius: 0.4rem;
+    outline: none;
+}
+
+.login-field input:focus {
+    border-color: var(--event-add-button-bg-color);
+    box-shadow: 0 0 0 2px rgba(122, 191, 179, 0.25);
+}
+
+.login-submit {
+    margin-top: 0.5rem;
+    padding: 0.85rem 1rem;
+    font-family: var(--calendar-title-font);
+    font-size: 1rem;
+    font-weight: bold;
+    color: var(--days-bg-color);
+    background-color: var(--event-add-button-bg-color);
+    border: none;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+}
+
+.login-submit:hover {
+    filter: brightness(1.05);
+}
+
+.login-submit:active {
+    filter: brightness(0.9);
+}
+
+.login-submit:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.login-message {
+    padding: 0.65rem 0.85rem;
+    font-size: 0.9rem;
+    border-radius: 0.4rem;
+    text-align: center;
+}
+
+.login-message[hidden] {
+    display: none;
+}
+
+.login-message.error {
+    color: #ff8b8b;
+    background-color: rgba(242, 41, 58, 0.12);
+    border: 1px solid rgba(242, 41, 58, 0.4);
+}
+
+.login-message.success {
+    color: #7ABFB3;
+    background-color: rgba(122, 191, 179, 0.12);
+    border: 1px solid rgba(122, 191, 179, 0.4);
+}
+
+/* Tablets e computadores: cartão um pouco maior */
+@media (min-width: 600px) {
+    .login-card {
+        padding: 2.5rem 2rem;
+    }
+
+    .login-title {
+        font-size: 2rem;
+    }
+}

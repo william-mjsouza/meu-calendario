@@ -2,11 +2,61 @@
 
 /* Supondo */
 main {
+    position: relative; /* Ancora o botão flutuante de logout */
     display: flex;
     align-items: center;
     justify-content: center;
     width: 100vw;
     height: 100vh;
+}
+
+/* Botão flutuante de logout no canto superior direito */
+.logout-button {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    z-index: 30; /* Acima do calendário e dos pop-ups principais */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    color: var(--calendar-title-color);
+    background-color: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--matrix-border-color);
+    border-radius: 50%;
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.35);
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.logout-button i {
+    font-size: 1.25rem;
+}
+
+.logout-button:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+.logout-button:active {
+    transform: scale(0.94);
+}
+
+/* Tablets e computadores: botão um pouco maior e mais afastado da borda */
+@media (min-width: 600px) {
+    .logout-button {
+        top: 0.9rem;
+        right: 0.9rem;
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+
+    .logout-button i {
+        font-size: 1.4rem;
+    }
 }
 
 /* Supondo */

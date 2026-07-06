@@ -3,6 +3,7 @@ import { getDayOfWeek, getDayOfWeekName, getMonthName } from './newDateFunctions
 import { calendarState, showCalendar } from './showCalendar.js';
 import { getEventsForDay } from './markDays.js';
 import { applyHoldRippleEffect } from './animations/rippleEffect.js';
+import { deleteEvent as apiDeleteEvent, updateEvent as apiUpdateEvent } from './api.js';
 
 const calendar = document.querySelector('.calendar');
 const createEventPopup = document.querySelector('.add-event');
@@ -143,6 +144,10 @@ function handleDeleteEvent(eventToRemove) {
     if (index !== -1) {
         calendarState.dayEvents.splice(index, 1);
     }
+    // Persiste a remoção no backend (se o evento tem id, ou seja, já foi salvo lá)
+    if (eventToRemove.id) {
+        apiDeleteEvent(eventToRemove.id).catch(err => console.error("Falha ao excluir evento no backend:", err));
+    }
     // Atualiza o calendário (remove o marcador do dia se for o caso)
     showCalendar(calendarState.month, calendarState.year);
     // Re-renderiza a lista do dia
@@ -172,6 +177,10 @@ function handleConcludeEvent(eventObj, savedEventElement) {
     savedEventElement.classList.toggle('concluded', eventObj.concluded);
     // Atualiza o calendário (os marcadores das recorrências futuras somem ao marcar)
     showCalendar(calendarState.month, calendarState.year);
+    // Persiste a mudança no backend (se o evento já foi salvo lá)
+    if (eventObj.id) {
+        apiUpdateEvent(eventObj.id, eventObj).catch(err => console.error("Falha ao atualizar evento no backend:", err));
+    }
 }
 
 function closeCreateEventPopup() {

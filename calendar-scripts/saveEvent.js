@@ -10,6 +10,9 @@ import { openRepetitionConfigPopup, repetitionState, resetRepetitionState, getFr
 // Importa o pop-up de escolha de data/hora do evento
 import { openDateTimePicker, isSameDay } from './dateTimePicker.js';
 
+// Importa o cliente da API para persistir os eventos no backend
+import { createEvent as apiCreateEvent, updateEvent as apiUpdateEvent } from './api.js';
+
 // Importa o objeto que contém o estado atual do calendário
 import { calendarState } from './showCalendar.js'
 
@@ -184,13 +187,20 @@ function saveEvent() {
     };
 
     if (editingEvent) {
-        // Atualiza o evento existente preservando a posição no array
+        // Atualiza otimisticamente na UI e persiste no backend em segundo plano
         Object.assign(editingEvent, eventData);
+        if (editingEvent.id) {
+            apiUpdateEvent(editingEvent.id, editingEvent)
+                .then(updated => Object.assign(editingEvent, updated))
+                .catch(err => console.error("Falha ao atualizar evento no backend:", err));
+        }
     } else {
-        // Cria um novo evento
+        // Cria localmente e envia para o backend; ao voltar, atualiza a referência com o id gerado
         calendarState.dayEvents.push(eventData);
+        apiCreateEvent(eventData)
+            .then(created => Object.assign(eventData, created))
+            .catch(err => console.error("Falha ao criar evento no backend:", err));
     }
-    console.log(calendarState.dayEvents);
 
     // Sai do "modo edição"
 
