@@ -89,7 +89,7 @@ input, textarea {
     flex: 1 1 0; /* Permite que o input cresça e encolha */
     min-width: 5rem; /* Limita o encolhimento do input para manter a legibilidade */
     padding: 0.25rem;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
 
 .save-event-form-group1 input:focus {

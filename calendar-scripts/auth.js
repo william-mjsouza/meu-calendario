@@ -2,10 +2,21 @@
 // Alterna entre as abas, envia os formulários e redireciona para o calendário ao autenticar
 
 import { isAuthenticated, login, register, saveSession } from './api.js';
+import { showToast } from './toast.js';
 
 // Se o usuário já está autenticado, vai direto para o calendário
 if (isAuthenticated()) {
     window.location.href = "calendar.html";
+}
+
+// Exibe uma mensagem "flash" deixada por outra página (ex.: sessão expirou)
+const flash = sessionStorage.getItem("mc.flash");
+if (flash) {
+    try {
+        const { message, type } = JSON.parse(flash);
+        showToast(message, { type });
+    } catch (_) { /* ignora payload inválido */ }
+    sessionStorage.removeItem("mc.flash");
 }
 
 const tabs = document.querySelectorAll('.login-tab');
@@ -48,6 +59,11 @@ async function handleSubmit(form, action) {
         const response = await action();
         saveSession(response);
         showMessage("Autenticado! Redirecionando…", "success");
+        // Deixa um toast de boas-vindas para aparecer assim que o calendário carregar
+        sessionStorage.setItem("mc.flash", JSON.stringify({
+            message: `Bem-vindo, ${response.name}!`,
+            type: "success"
+        }));
         setTimeout(() => window.location.href = "calendar.html", 300);
     } catch (err) {
         showMessage(err.message || "Não foi possível autenticar.", "error");

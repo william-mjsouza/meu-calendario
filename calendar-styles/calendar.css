@@ -10,12 +10,14 @@ main {
     height: 100vh;
 }
 
-/* Botão flutuante de logout no canto superior direito */
+/* Botão flutuante de logout no canto superior direito.
+   Fica visível apenas na tela do calendário — qualquer pop-up ativo (que tem z-index >= 5)
+   passa por cima e esconde o botão. */
 .logout-button {
     position: absolute;
     top: 0.6rem;
     right: 0.6rem;
-    z-index: 30; /* Acima do calendário e dos pop-ups principais */
+    z-index: 1; /* Abaixo dos overlays (z:5) e de todos os pop-ups (z:10..25) */
     display: flex;
     align-items: center;
     justify-content: center;

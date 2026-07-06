@@ -4,6 +4,7 @@ import { calendarState, showCalendar } from './showCalendar.js';
 import { getEventsForDay } from './markDays.js';
 import { applyHoldRippleEffect } from './animations/rippleEffect.js';
 import { deleteEvent as apiDeleteEvent, updateEvent as apiUpdateEvent } from './api.js';
+import { showToast } from './toast.js';
 
 const calendar = document.querySelector('.calendar');
 const createEventPopup = document.querySelector('.add-event');
@@ -138,20 +139,55 @@ function renderSavedEvents() {
     });
 }
 
-// Remove o evento da lista global e atualiza o calendário e o pop-up
+// Remove o evento da lista com padrão "excluir + desfazer":
+// 1. Remove imediatamente da UI para feedback instantâneo
+// 2. Mostra um toast "Evento excluído — Desfazer" por 5s
+// 3. Ao final do prazo (sem clique em Desfazer), efetiva a remoção no backend
+// 4. Se o usuário clicar em Desfazer, o evento volta ao array e o marcador retorna ao calendário
 function handleDeleteEvent(eventToRemove) {
     const index = calendarState.dayEvents.indexOf(eventToRemove);
-    if (index !== -1) {
-        calendarState.dayEvents.splice(index, 1);
-    }
-    // Persiste a remoção no backend (se o evento tem id, ou seja, já foi salvo lá)
-    if (eventToRemove.id) {
-        apiDeleteEvent(eventToRemove.id).catch(err => console.error("Falha ao excluir evento no backend:", err));
-    }
-    // Atualiza o calendário (remove o marcador do dia se for o caso)
+    if (index === -1) return;
+
+    // Remove da UI imediatamente (posição original guardada para eventual restauração)
+    calendarState.dayEvents.splice(index, 1);
     showCalendar(calendarState.month, calendarState.year);
-    // Re-renderiza a lista do dia
     renderSavedEvents();
+
+    // Estado do desfazer: se for null quando o toast expirar, é porque o usuário desfez
+    let undone = false;
+
+    showToast("Evento excluído", {
+        type: "success",
+        duration: 5000,
+        action: {
+            label: "Desfazer",
+            onClick: () => {
+                undone = true;
+                // Restaura o evento na mesma posição original
+                calendarState.dayEvents.splice(index, 0, eventToRemove);
+                showCalendar(calendarState.month, calendarState.year);
+                renderSavedEvents();
+            }
+        }
+    });
+
+    // Só chama o backend quando o prazo de desfazer expira e o usuário não desfez
+    if (eventToRemove.id) {
+        setTimeout(() => {
+            if (undone) return; // Nada a fazer — evento foi restaurado
+            apiDeleteEvent(eventToRemove.id)
+                .catch(err => {
+                    console.error("Falha ao excluir evento no backend:", err);
+                    showToast("Não foi possível excluir do servidor", { type: "error" });
+                    // Restaura localmente já que o servidor recusou
+                    if (!calendarState.dayEvents.includes(eventToRemove)) {
+                        calendarState.dayEvents.splice(index, 0, eventToRemove);
+                        showCalendar(calendarState.month, calendarState.year);
+                        renderSavedEvents();
+                    }
+                });
+        }, 5100); // Um pouco depois do toast expirar
+    }
 }
 
 // Alterna o estado de "concluído" do evento (persiste no objeto do evento)

@@ -44,10 +44,15 @@ async function request(path, { method = "GET", body, auth = true } = {}) {
         body: body !== undefined ? JSON.stringify(body) : undefined
     });
 
-    // Sessão expirada / inválida — força logout e redirect
+    // Sessão expirada / inválida — força logout e redirect com aviso na tela de login
     if (response.status === 401 && auth) {
         clearSession();
         if (!location.pathname.endsWith("index.html") && location.pathname !== "/") {
+            // Deixa uma mensagem para o auth.js exibir como toast na tela de login
+            sessionStorage.setItem("mc.flash", JSON.stringify({
+                message: "Sua sessão expirou. Entre novamente.",
+                type: "error"
+            }));
             location.href = "index.html";
         }
         throw new Error("Sessão expirada. Faça login novamente.");

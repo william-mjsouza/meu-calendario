@@ -13,6 +13,9 @@ import { openDateTimePicker, isSameDay } from './dateTimePicker.js';
 // Importa o cliente da API para persistir os eventos no backend
 import { createEvent as apiCreateEvent, updateEvent as apiUpdateEvent } from './api.js';
 
+// Importa o sistema de toasts (snackbars) para feedback visual das ações
+import { showToast } from './toast.js';
+
 // Importa o objeto que contém o estado atual do calendário
 import { calendarState } from './showCalendar.js'
 
@@ -34,6 +37,30 @@ const timeLabel = document.querySelector('.save-event-time-label');
 
 // Referência ao evento que está sendo editado (null = criação de um novo evento)
 let editingEvent = null;
+
+// Assinatura do evento no momento em que a edição foi aberta.
+// Usada para detectar "nenhuma mudança" e evitar chamadas desnecessárias ao backend.
+let editingEventSnapshot = null;
+
+// Gera uma string estável que representa o "conteúdo" relevante de um evento para comparação.
+// Ignora o id (que não muda numa edição) e serializa Datas como ISO para comparação segura.
+function computeEventSignature(event) {
+    return JSON.stringify({
+        title: event.title || "",
+        description: event.description || "",
+        start_date: event.start_date ? new Date(event.start_date).toISOString() : null,
+        end_event_date: event.end_event_date ? new Date(event.end_event_date).toISOString() : null,
+        start_hour: event.start_hour || null,
+        end_hour: event.end_hour || null,
+        all_day: !!event.all_day,
+        frequency: event.frequency || "once",
+        end_date: event.end_date ? new Date(event.end_date).toISOString() : null,
+        color: event.color || "",
+        formGroupColor: event.formGroupColor || "",
+        concluded: !!event.concluded,
+        originalFrequency: event.originalFrequency || null
+    });
+}
 
 // Estado tentativo do datetime do evento sendo criado/editado
 // (dias e horas escolhidos no pop-up de data/hora; commit no saveEvent())
@@ -89,6 +116,7 @@ function closeSaveEventPopup() {
 
     // Sai do modo de edição
     editingEvent = null;
+    editingEventSnapshot = null;
 
     // Remove o escutador de evento
     colorPickerButton.removeEventListener('click', openColorPickerPopup);
@@ -187,19 +215,45 @@ function saveEvent() {
     };
 
     if (editingEvent) {
+        // Compara a assinatura antes/depois. Se nada mudou, não gasta chamada no backend
+        // nem mostra um toast enganoso — só fecha o pop-up silenciosamente.
+        const newSignature = computeEventSignature(eventData);
+        if (newSignature === editingEventSnapshot) {
+            closeSaveEventPopup();
+            return;
+        }
+
         // Atualiza otimisticamente na UI e persiste no backend em segundo plano
         Object.assign(editingEvent, eventData);
-        if (editingEvent.id) {
-            apiUpdateEvent(editingEvent.id, editingEvent)
-                .then(updated => Object.assign(editingEvent, updated))
-                .catch(err => console.error("Falha ao atualizar evento no backend:", err));
+        // Captura uma referência local ao evento porque closeSaveEventPopup() vai zerar editingEvent
+        // antes do .then() do apiUpdateEvent resolver — sem isso, Object.assign(null, ...) lança
+        // TypeError e o toast de erro aparece mesmo com o PUT tendo sucesso no servidor.
+        const editedRef = editingEvent;
+        if (editedRef.id) {
+            apiUpdateEvent(editedRef.id, editedRef)
+                .then(updated => {
+                    Object.assign(editedRef, updated);
+                    showToast("Evento atualizado");
+                })
+                .catch(err => {
+                    console.error("Falha ao atualizar evento no backend:", err);
+                    showToast("Não foi possível salvar as alterações", { type: "error" });
+                });
+        } else {
+            showToast("Evento atualizado");
         }
     } else {
         // Cria localmente e envia para o backend; ao voltar, atualiza a referência com o id gerado
         calendarState.dayEvents.push(eventData);
         apiCreateEvent(eventData)
-            .then(created => Object.assign(eventData, created))
-            .catch(err => console.error("Falha ao criar evento no backend:", err));
+            .then(created => {
+                Object.assign(eventData, created);
+                showToast("Evento salvo");
+            })
+            .catch(err => {
+                console.error("Falha ao criar evento no backend:", err);
+                showToast("Não foi possível salvar no servidor", { type: "error" });
+            });
     }
 
     // Sai do "modo edição"
@@ -220,6 +274,7 @@ export function openSaveEventPopup(eventToEdit) {
     if (eventToEdit) {
         // Modo edição: preenche os campos com os dados do evento
         editingEvent = eventToEdit;
+        editingEventSnapshot = computeEventSignature(eventToEdit);
         eventName.value = eventToEdit.title;
         eventDescription.value = eventToEdit.description;
         colorPickerButton.style.backgroundColor = eventToEdit.color || '';
@@ -236,6 +291,7 @@ export function openSaveEventPopup(eventToEdit) {
     } else {
         // Modo criação: limpa todos os campos e reseta o estado de repetição
         editingEvent = null;
+        editingEventSnapshot = null;
         eventName.value = '';
         eventDescription.value = '';
         colorPickerButton.style.backgroundColor = '';      // Volta à cor padrão definida no CSS

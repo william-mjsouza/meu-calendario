@@ -1,5 +1,17 @@
 // Importa o cliente da API (autenticação + eventos)
 import { isAuthenticated, listEvents, clearSession } from './api.js';
+import { showToast } from './toast.js';
+
+// Exibe uma mensagem "flash" deixada por outra página (ex.: boas-vindas após login)
+const flash = sessionStorage.getItem("mc.flash");
+if (flash) {
+    try {
+        const { message, type } = JSON.parse(flash);
+        // setTimeout garante que o container do toast já esteja no DOM antes de exibir
+        setTimeout(() => showToast(message, { type }), 100);
+    } catch (_) { /* payload inválido — ignora */ }
+    sessionStorage.removeItem("mc.flash");
+}
 
 // Guard de autenticação: se não houver token válido, volta para a tela de login
 if (!isAuthenticated()) {
@@ -299,6 +311,7 @@ async function main() {
         showCalendar(calendarState.month, calendarState.year);
     } catch (err) {
         console.error("Falha ao carregar eventos do backend:", err);
+        showToast("Não foi possível carregar seus eventos", { type: "error" });
     }
 }
 
