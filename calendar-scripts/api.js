@@ -1,7 +1,14 @@
-// Cliente HTTP compartilhado que fala com o backend Spring Boot em http://localhost:8080
+// Cliente HTTP compartilhado que fala com o backend Spring Boot
 // Todas as chamadas incluem o token JWT armazenado em localStorage automaticamente
 
-export const API_BASE_URL = "http://localhost:8080";
+// Detecta o backend automaticamente:
+//   - Localhost/127.0.0.1 (dev) → http://localhost:8080
+//   - Qualquer outra origem (produção Vercel) → variável PRODUCTION_API_URL abaixo
+// Troque PRODUCTION_API_URL pela URL pública do seu backend no Render depois do deploy.
+const PRODUCTION_API_URL = "https://meu-calendario-api.onrender.com";
+
+const isLocalHost = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+export const API_BASE_URL = isLocalHost ? "http://localhost:8080" : PRODUCTION_API_URL;
 
 // Chaves usadas para persistir a sessão do usuário no localStorage
 const TOKEN_KEY = "mc.token";
