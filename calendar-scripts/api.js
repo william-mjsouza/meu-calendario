@@ -33,8 +33,39 @@ export function clearSession() {
     localStorage.removeItem(USER_KEY);
 }
 
+// Decodifica o payload de um JWT (Base64Url → JSON) sem validar assinatura
+// A validação de assinatura é responsabilidade do backend; aqui só lemos o campo exp
+function parseJwtPayload(token) {
+    try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const json = decodeURIComponent(
+            atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+        );
+        return JSON.parse(json);
+    } catch (_) {
+        return null;
+    }
+}
+
+// Retorna true se o token está expirado (ou inválido / sem campo exp)
+// Aplica um "clock skew" de 30 segundos para tolerar pequenas diferenças de relógio
+function isTokenExpired(token) {
+    const payload = parseJwtPayload(token);
+    if (!payload || typeof payload.exp !== 'number') return true;
+    return payload.exp * 1000 <= Date.now() + 30_000;
+}
+
 export function isAuthenticated() {
-    return !!getToken();
+    const token = getToken();
+    if (!token) return false;
+    // Token expirado é tratado como "não autenticado". Limpa o localStorage
+    // para não deixar sessão fantasma que enganaria a próxima checagem.
+    if (isTokenExpired(token)) {
+        clearSession();
+        return false;
+    }
+    return true;
 }
 
 // Wrapper de fetch que adiciona Content-Type e Authorization
